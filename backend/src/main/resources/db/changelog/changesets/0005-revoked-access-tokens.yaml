@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0005-revoked-access-tokens
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: revoked_access_tokens
+            columns:
+              - column:
+                  name: jti
+                  type: varchar(36)
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: revoked_access_tokens
+            indexName: idx_revoked_expiry
+            columns:
+              - column:
+                  name: expires_at

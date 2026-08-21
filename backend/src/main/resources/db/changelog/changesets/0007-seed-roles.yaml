@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0007-seed-roles
+      author: bookaura
+      # Roles are reference data: seeded in EVERY environment (admin/admin itself is local-only, D10).
+      changes:
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: ADMIN
+        - insert:
+            tableName: roles
+            columns:
+              - column:
+                  name: name
+                  value: USER

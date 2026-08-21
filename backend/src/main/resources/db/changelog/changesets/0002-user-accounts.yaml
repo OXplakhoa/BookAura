@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0002-user-accounts
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: user_accounts
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: phone
+                  type: varchar(20)
+                  constraints:
+                    unique: true
+              - column:
+                  name: password_hash
+                  type: varchar(72)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_verified_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: user_account_roles
+            columns:
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_uar_user
+                    references: user_accounts(id)
+                    deleteCascade: true
+              - column:
+                  name: role_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_uar_role
+                    references: roles(id)
+        - addPrimaryKey:
+            tableName: user_account_roles
+            columnNames: user_account_id, role_id
+            constraintName: pk_user_account_roles
