@@ -1,0 +1,25 @@
+# LOCAL profile - developer machine. Secrets here are throwaway local values ONLY.
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookaura
+    username: bookaura
+    password: bookaura
+  liquibase:
+    contexts: local            # enables local-only seed (admin/admin)
+  mail:
+    host: localhost            # Mailpit SMTP catcher
+    port: 1025
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+logging:
+  level:
+    com.bookaura: debug
+
+bookaura:
+  security:
+    # Local throwaway secret (64 chars > 32 bytes required for HS256). Overridden by JWT_SECRET env if set.
+    jwt-secret: ${JWT_SECRET:local-dev-only-do-not-use-in-prod-bookaura-jwt-secret-key-256bit}
+    refresh-cookie-secure: false
+  frontend-url: http://localhost:5173

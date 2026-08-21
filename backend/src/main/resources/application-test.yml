@@ -1,0 +1,10 @@
+# TEST profile - datasource is injected by Testcontainers (DynamicPropertySource).
+spring:
+  liquibase:
+    contexts: test             # schema only, no local admin seed
+
+bookaura:
+  security:
+    jwt-secret: test-only-secret-do-not-use-in-prod-bookaura-jwt-secret-key-256bit!!
+    refresh-cookie-secure: false
+  frontend-url: http://localhost:5173

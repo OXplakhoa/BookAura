@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bookaura-postgres
+    environment:
+      POSTGRES_DB: bookaura
+      POSTGRES_USER: bookaura
+      POSTGRES_PASSWORD: bookaura
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bookaura -d bookaura"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: bookaura-mailpit
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI: http://localhost:8025
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

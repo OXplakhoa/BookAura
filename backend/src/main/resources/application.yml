@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: bookaura
+  jpa:
+    hibernate:
+      ddl-auto: validate        # Liquibase is the only schema owner (D11)
+    open-in-view: false         # force explicit fetching, no lazy loading in views
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health        # only health is exposed (maintenance-mode whitelist)
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+bookaura:
+  security:
+    jwt-secret: ${JWT_SECRET:}              # MUST be >= 32 bytes; empty -> startup fails outside local/test
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 7
+    refresh-cookie-name: bookaura_refresh
+    refresh-cookie-secure: true             # overridden to false only in local
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}
