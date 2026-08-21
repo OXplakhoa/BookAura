@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0003-member-profiles
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: member_profiles
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_profile_user
+                    references: user_accounts(id)
+              - column:
+                  name: full_name
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date_of_birth
+                  type: date
+              - column:
+                  name: address
+                  type: varchar(255)
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false

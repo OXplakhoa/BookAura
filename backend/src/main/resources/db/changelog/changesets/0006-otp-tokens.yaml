@@ -1,0 +1,66 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0006-otp-tokens
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: otp_tokens
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_otp_user
+                    references: user_accounts(id)
+                    deleteCascade: true
+              - column:
+                  name: target
+                  type: varchar(255)
+              - column:
+                  name: purpose
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code_hash
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: attempts
+                  type: integer
+                  defaultValue: 0
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consumed_at
+                  type: timestamptz
+              - column:
+                  name: last_sent_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: otp_tokens
+            indexName: idx_otp_lookup
+            columns:
+              - column:
+                  name: code_hash
+              - column:
+                  name: purpose

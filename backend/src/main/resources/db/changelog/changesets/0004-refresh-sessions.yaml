@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0004-refresh-sessions
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: refresh_sessions
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_refresh_user
+                    references: user_accounts(id)
+                    deleteCascade: true
+              - column:
+                  name: token_hash
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: family_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+              - column:
+                  name: expires_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: revoked_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: ip
+                  type: varchar(45)
+              - column:
+                  name: user_agent
+                  type: varchar(255)
+        - createIndex:
+            tableName: refresh_sessions
+            indexName: idx_refresh_family
+            columns:
+              - column:
+                  name: family_id

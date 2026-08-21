@@ -1,3 +1,17 @@
 # Liquibase master changelog - the ONLY source of truth for schema (D11).
 # Changesets are appended, never edited after being applied.
-databaseChangeLog: []
+databaseChangeLog:
+  - include:
+      file: db/changelog/changesets/0001-roles.yaml
+  - include:
+      file: db/changelog/changesets/0002-user-accounts.yaml
+  - include:
+      file: db/changelog/changesets/0003-member-profiles.yaml
+  - include:
+      file: db/changelog/changesets/0004-refresh-sessions.yaml
+  - include:
+      file: db/changelog/changesets/0005-revoked-access-tokens.yaml
+  - include:
+      file: db/changelog/changesets/0006-otp-tokens.yaml
+  - include:
+      file: db/changelog/changesets/0007-seed-roles.yaml
