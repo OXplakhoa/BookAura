@@ -1,0 +1,108 @@
+package com.bookaura.common.security;
+
+import com.bookaura.common.error.ApiError;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
+
+/**
+ * Stateless JWT API security.
+ * CSRF is disabled because this is a token-based API, not a browser session app; the single
+ * cookie we use (refresh token) is protected by SameSite=Lax + a strict CORS allowlist (D4).
+ * Method-level authorization (@PreAuthorize) is the authoritative role enforcement.
+ */
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
+                                                   CorsConfigurationSource corsConfigurationSource)
+            throws Exception {
+        http
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/register",
+                                "/api/auth/verify-email",
+                                "/api/auth/resend-verification",
+                                "/api/auth/login",
+                                "/api/auth/refresh",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/health",
+                                "/error"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((req, res, authEx) -> {
+                            // 401: not authenticated. Specific code when the JWT filter diagnosed the failure.
+                            String code = (String) req.getAttribute(JwtAuthenticationFilter.ATTR_JWT_ERROR);
+                            if (code == null) {
+                                code = "UNAUTHORIZED";
+                            }
+                            writeError(res, HttpServletResponse.SC_UNAUTHORIZED, code, "Unauthorized", req.getRequestURI());
+                        })
+                        .accessDeniedHandler((req, res, deniedEx) ->
+                                // 403: authenticated but lacks the role/authority.
+                                writeError(res, HttpServletResponse.SC_FORBIDDEN, "ACCESS_DENIED",
+                                        "You do not have permission to access this resource", req.getRequestURI()))
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${bookaura.frontend-url}") String frontendUrl) {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of(frontendUrl)); // explicit origin, never "*" with credentials
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Trace-Id"));
+        config.setExposedHeaders(List.of("X-Trace-Id"));
+        config.setAllowCredentials(true); // refresh cookie is cross-origin in local dev (5173 -> 8080)
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    private void writeError(HttpServletResponse res, int status, String code, String message, String path)
+            throws java.io.IOException {
+        res.setStatus(status);
+        res.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        ApiError body = ApiError.of(status, code,
+                status == 401 ? "Unauthorized" : "Forbidden", message, path, MDC.get("traceId"));
+        res.getWriter().write(objectMapper.writeValueAsString(body));
+    }
+}
