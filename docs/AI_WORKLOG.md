@@ -103,4 +103,16 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Operational risk recorded:** only a currently valid ADMIN access token can turn maintenance off. Login/refresh are intentionally not whitelisted; local fallback is restart after changing the DB flag. This keeps required exceptions narrow.
 - **Tests/commands executed:** compile pass; maintenance targeted **2/2 pass**; full `./mvnw verify` **46/46 pass**; local Liquibase `0010`; live ON 200 → public catalog 503 with traceId → health 200 → OFF 200.
 - **Result:** Maintenance backend P0-A complete; frontend maintenance route/interceptor remains pending.
-- **Commits:** `1abc3a3`, `3b5e323`, `ccf5284`; docs commit and merge reported after creation.
+- **Commits:** `1abc3a3`, `3b5e323`, `ccf5284`; docs `d65fac2`; merge `ea65933`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Observability / AOP hardening
+
+- **Goal:** complete P0 logging/AOP expectations while proving no passwords/tokens/OTP/PII leak.
+- **Files:** `HttpExchangeLoggingFilter`, `SafePayloadSanitizer`, `LogOperation`, `ServiceOperationLoggingAspect`; service annotations; auth/SMTP audit cleanup; logging tests; docs.
+- **Important review points:** filter never logs headers/query strings; auth/OAuth/infra/multipart bodies are not wrapped; non-sensitive JSON is parsed before recursive redaction and capped at 2k chars; malformed JSON returns a marker, never raw text; AOP never inspects args/results.
+- **Problems found/corrections:** compile caught wrong caching-wrapper package (`web.filter` → `web.util`). Targeted logging tests passed, but first full suite made `CapturedOutput` empty because a cached Log4j2 context retained an older console stream. Replaced it with test-only appenders attached directly to the two production loggers; unchanged production behavior; full suite passed. Security review additionally redacted member PII and removed raw login identifier/email destination from audit/SMTP logs.
+- **Tests/commands executed:** logging targeted **4/4 pass**; first full suite 49/50 (capture seam failure); after test fix final `./mvnw verify` **50/50 pass**.
+- **Result:** Log4j2/trace/audit/request-response/AOP baseline complete; frontend remains pending.
+- **Commits:** `d009bb2`, `0bcb52a`, `725436b`; docs commit and merge reported after creation.

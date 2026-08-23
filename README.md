@@ -75,6 +75,10 @@ Clean Code,9780132350884,Robert C. Martin,Programming|Software Engineering,2008,
 Import is all-or-nothing. File must be `.csv` and **strictly below 5 MiB**; validation
 errors are returned by row (for example `row[3].isbn`).
 
+Observability: every response carries `X-Trace-Id`; Log4j2 writes console + rolling file logs;
+HTTP bodies are bounded/redacted (auth bodies suppressed), and `@LogOperation` AOP records
+service outcome/duration without arguments or return values.
+
 ## Environment variables
 
 See `.env.example`. Real secrets go in a local `.env` file — **never committed**

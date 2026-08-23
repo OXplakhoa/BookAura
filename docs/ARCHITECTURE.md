@@ -87,6 +87,12 @@ DB flag off); widening the exception to login/refresh was rejected to keep the e
 
 ## Logging / observability
 
-Implemented: Log4j2 console + rolling file, MDC `traceId`, security/business audit logger.
-Pending observability slice: redacted request/response logging and AOP service duration logging.
-Passwords/tokens/OTP/Authorization are never logged.
+Implemented:
+- Log4j2 console + rolling file (`10 MiB`, daily/size rotation, five archives).
+- `TraceIdFilter` puts `traceId` in MDC, response header and every API error.
+- `HttpExchangeLoggingFilter` logs method/path/status/duration only (never query strings/headers),
+  suppresses auth/OAuth/infra/multipart bodies, parses and recursively redacts JSON, caps output at 2,000 chars.
+- Redacted fields include passwords, tokens, OTP/codes/secrets and member PII. Malformed JSON never falls
+  back to raw logging.
+- `@LogOperation` AOP logs only service name, outcome and duration — never arguments/results/entities.
+- Dedicated audit logger records security/business event names and entity IDs, not credentials.
