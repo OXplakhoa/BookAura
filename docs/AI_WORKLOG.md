@@ -77,4 +77,18 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Problems found/corrections:** after the first successful full suite and local smoke, Docker Desktop stopped again; a final verify therefore produced 3 Testcontainers environment errors (unit tests still passed). Logs showed WSL itself was healthy but Docker received `QuitDockerDesktop`; Bash background launch was not reliably detached. Ran `wsl --shutdown`, launched Docker with Windows `Start-Process`, verified the engine stayed alive, then reran the unchanged suite successfully. This failed run is not reported as a code failure or completion.
 - **Tests/commands executed:** targeted loan **8/8 pass**; final `./mvnw verify` retry **37/37 pass**; Docker remained alive after verify; real two-thread final-copy test; forced borrow rollback; forced return rollback; local Liquibase `0009` + live borrow 201/return 200.
 - **Result:** Loan P0-A backend slice complete; Member management can now search real Loan→Book data.
-- **Commits:** `f74c141`, `32b012a`, `9979f60`; docs commit and merge reported after creation.
+- **Commits:** `f74c141`, `32b012a`, `9979f60`; docs `f6ccec3`, environment evidence `a992fbb`; merge `e9a40a5`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Member Management backend slice
+
+- **Goal:** deliver ADMIN Member CRUD/disable and ≥5 composable search conditions, now backed by real Loan→Book data.
+- **Files:** `member/**`; MemberProfile inverse loans relation/repository Specification support; account phone uniqueness; global Hibernate batch fetch; member tests; shared Testcontainers base fix; docs.
+- **Important review points:** generic update cannot change email or role (email needs OTP verification, role needs separate privileged API); disable retains account/profile/loans; ADMIN-created member defaults unverified unless explicitly verified after in-person check.
+- **Problems found/corrections:**
+  1. Seven-filter query returned PostgreSQL error: `SELECT DISTINCT` cannot order by joined `user.email` absent from select list. Replaced borrowed-title join+distinct with correlated `EXISTS`; removed unnecessary role distinct. Same integration test then passed.
+  2. Targeted tests passed, but full suite reused a cached Auth Spring context after inherited JUnit `@Container` had stopped; Hikari pointed to a dead random port. Reworked `AbstractIntegrationTest` to one JVM-lifetime PostgreSQL container with `DynamicPropertySource`; full suite passed.
+- **Tests/commands executed:** member targeted first 6/7 (query failure), unchanged regression after fix **7/7**; first full suite exposed 5 stale-container errors; after test-infra fix final `./mvnw verify` **44/44 pass**; Docker remained alive.
+- **Result:** Member backend P0-A slice complete, including borrowed-book/title criterion and strict mentor date behavior.
+- **Commits:** `f03539a`, `fd81b42`, `ff02313`; docs commit and merge reported after creation.
