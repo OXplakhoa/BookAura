@@ -28,6 +28,16 @@ public enum ErrorCode {
     DUPLICATE_ISBN(HttpStatus.CONFLICT),
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND),
     INVENTORY_BELOW_BORROWED_COUNT(HttpStatus.CONFLICT),
+
+    // Loans
+    MEMBER_PROFILE_NOT_FOUND(HttpStatus.NOT_FOUND),
+    LOAN_NOT_FOUND(HttpStatus.NOT_FOUND),
+    BOOK_OUT_OF_STOCK(HttpStatus.CONFLICT),
+    DUPLICATE_ACTIVE_LOAN(HttpStatus.CONFLICT),
+    DUPLICATE_RETURN(HttpStatus.CONFLICT),
+    LOAN_NOT_OWNED(HttpStatus.FORBIDDEN),
+    INVENTORY_INCONSISTENT(HttpStatus.CONFLICT),
+
     NOT_FOUND(HttpStatus.NOT_FOUND),
 
     // Pagination / sorting
