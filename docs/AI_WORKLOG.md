@@ -38,3 +38,26 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Commands/tests executed:** `./mvnw test` → **17/17 pass** (9 Testcontainers integration + 8 unit); fresh-DB boot via Liquibase → 9 tables; live curl: health UP, admin login, /me, admin ping, refresh rotation 200, replay old cookie → 401 `REFRESH_REUSED`.
 - **Result:** auth-core slice verified end-to-end (tests + live smoke).
 - **Commit:** (see git log — reported after commit)
+
+---
+
+## 2026-08-23 — Session 2: Book Management backend slice
+
+- **Goal:** implement P0-A Book CRUD/search/pagination/sorting/CSV import without starting frontend bonus work.
+- **Prompt summary:** "Continue building; commit every completed feature clearly."
+- **Files:** catalog entities/repos/DTOs/services/specifications/controllers/validators/importcsv; common page/error/security updates; Liquibase `0008-catalog-schema.yaml`; catalog unit + Testcontainers integration tests; README/requirements/ERD/decisions.
+- **Important review points:**
+  - Book owns unidirectional many-to-many join tables; no `CascadeType.ALL`, no entity JSON.
+  - Update preserves `borrowedCopies = total - available`; new total cannot drop below borrowed copies.
+  - Specification runs combined filters in SQL; page relation mapping uses `@BatchSize(50)` instead of collection-fetch pagination.
+  - CSV streams records, retains only a bounded validated model (`<5 MiB`, max 10k rows), uses `Set` duplicate detection O(n), and bulk relation/ISBN lookup.
+- **Problems found/corrections:** first integration run could not find Docker because `docker-desktop` WSL distro was stopped; confirmed with `docker info` + `wsl -l -v`, started Docker Desktop, reran unchanged tests successfully. Test-only forced rollback intentionally logs one stack trace while returning 500; assertions verify all three table counts unchanged.
+- **Commands/tests executed:**
+  - Context7 checked current Spring Data JPA Specification/Pageable and Spring multipart/transaction APIs; Apache Commons CSV streaming/header API.
+  - `./mvnw -DskipTests compile` → pass.
+  - Targeted catalog: **12/12 pass** (7 PostgreSQL integration + 5 unit).
+  - `./mvnw verify` → **29 tests, 0 failures, 0 errors**.
+  - `npm run build` → pass.
+  - Local profile smoke: health `UP`; Liquibase applied `0008-catalog-schema`; 5 catalog tables present; admin created a book (201); unauthenticated multi-condition public search returned it.
+- **Result:** Book Management backend P0-A slice complete; frontend screens remain pending.
+- **Commits:** `cec9dd6`, `83c8e63`, `248d68f`, `263edac`; docs commit reported after creation.

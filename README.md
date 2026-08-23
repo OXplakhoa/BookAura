@@ -52,6 +52,23 @@ npm run dev
 
 Local demo account (seeded only in `local` profile): `admin / admin`.
 
+## Implemented API slices
+
+- Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`
+- Public catalog: `GET /api/books`, `GET /api/books/{id}`
+- ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
+- Multi-sort example: `?sort=publicationYear:desc,title:asc`; maximum page size is 10.
+
+CSV header is exact; author/category lists use `|`:
+
+```csv
+title,isbn,authors,categories,publicationYear,totalQuantity,description
+Clean Code,9780132350884,Robert C. Martin,Programming|Software Engineering,2008,3,A handbook of agile software craftsmanship
+```
+
+Import is all-or-nothing. File must be `.csv` and **strictly below 5 MiB**; validation
+errors are returned by row (for example `row[3].isbn`).
+
 ## Environment variables
 
 See `.env.example`. Real secrets go in a local `.env` file — **never committed**

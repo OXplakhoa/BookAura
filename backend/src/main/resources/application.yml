@@ -7,6 +7,10 @@ spring:
     open-in-view: false         # force explicit fetching, no lazy loading in views
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  servlet:
+    multipart:
+      max-file-size: 5MB       # service enforces STRICTLY below 5 MiB
+      max-request-size: 6MB    # allows multipart envelope overhead
 
 server:
   port: 8080
