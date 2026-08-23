@@ -8,6 +8,7 @@ import { CatalogPage } from "./pages/CatalogPage";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
+import { LoansPage } from "./pages/LoansPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
@@ -35,8 +36,8 @@ export default function App() {
 
       <Route element={<RequireAuth />}>
         <Route element={<AppShell />}>
-          <Route path="app/loans" element={<PlaceholderPage title="Active loans" description="Your current loans, due dates and return controls will appear here." />} />
-          <Route path="app/history" element={<PlaceholderPage title="Reading history" description="Your returned books will appear here in chronological order." />} />
+          <Route path="app/loans" element={<LoansPage mode="active" />} />
+          <Route path="app/history" element={<LoansPage mode="history" />} />
           <Route element={<RequireAuth admin />}>
             <Route path="admin" element={<PlaceholderPage title="Admin workspace" description="Books, members, loans, CSV import and maintenance controls will be assembled here." />} />
           </Route>
