@@ -105,3 +105,13 @@ sequenceDiagram
 ```
 
 **Never** place JWTs in the redirect URL query params.
+
+Implemented details:
+- Google client registration bean exists only when both credentials are non-blank; no-secret local/test startup remains valid.
+- Spring Security validates OIDC state, nonce, signature and `email_verified`; callback code TTL is 60 seconds.
+- `oauth_identities(provider, provider_subject)` links stable provider identity separately from mutable email.
+- Existing matching email is linked and marked verified; otherwise a USER/profile is created with an unguessable
+  BCrypt placeholder (no usable password is invented).
+- Redirect code is URL-safe, DB stores SHA-256 only, and an atomic conditional update permits one exchange.
+- React removes `?code=` from browser history before POSTing it, then uses the normal memory access token + HttpOnly refresh cookie.
+- A transient `JSESSIONID` stores OAuth authorization state only and is invalidated by success/failure handlers.
