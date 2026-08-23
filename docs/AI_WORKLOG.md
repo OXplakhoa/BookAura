@@ -115,4 +115,17 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Problems found/corrections:** compile caught wrong caching-wrapper package (`web.filter` → `web.util`). Targeted logging tests passed, but first full suite made `CapturedOutput` empty because a cached Log4j2 context retained an older console stream. Replaced it with test-only appenders attached directly to the two production loggers; unchanged production behavior; full suite passed. Security review additionally redacted member PII and removed raw login identifier/email destination from audit/SMTP logs.
 - **Tests/commands executed:** logging targeted **4/4 pass**; first full suite 49/50 (capture seam failure); after test fix final `./mvnw verify` **50/50 pass**.
 - **Result:** Log4j2/trace/audit/request-response/AOP baseline complete; frontend remains pending.
-- **Commits:** `d009bb2`, `0bcb52a`, `725436b`; docs commit and merge reported after creation.
+- **Commits:** `d009bb2`, `0bcb52a`, `725436b`; docs `4bf37b1`; merge `5099315`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Core React frontend
+
+- **Goal:** complete P0-A mentor-demo UI without weakening the backend auth/security model.
+- **Files:** frontend design system; auth/session/Axios layer; public/auth/app layouts; catalog/detail; member loans; ADMIN books/members/loans/maintenance; Vitest setup/tests; docs.
+- **Important review points:** access token and identity live only in module memory; refresh token is never readable by React; one shared refresh promise prevents a 401 refresh storm; every retried request is marked once; backend remains authorization authority. Catalog state is encoded in URL. All dangerous/admin mutations use explicit feedback/confirmation. ADMIN routes are lazy chunks.
+- **UX/a11y:** warm editorial, no gradients/excessive pills; responsive desktop/mobile navigation; skip links, visible labels/focus, 44px targets, reduced-motion, field-local errors, semantic loading/error/empty/success states and keyboard Escape for confirmation dialogs. UI intelligence CLI was unavailable because the installed skill's `scripts` entry is a broken flattened symlink, so the loaded skill rules were applied manually and persisted in `frontend/design-system/MASTER.md`.
+- **Problems found/corrections:** Axios 1 test fixture required `AxiosHeaders`; replaced Log4j-style output assumptions with typed frontend tests. Oxlint rejected synchronous prop→state effect in filters; keyed the filter form by URL state instead. Vite warned at 507k main bundle; used `React.lazy`/`Suspense` for ADMIN routes, reducing main chunk to 466k and producing 2–7k route chunks. Fixed dark-background logo contrast, mobile sign-out, admin field error associations, read-only email submission and CSV row-error rendering. First CSV live command failed locally before any request because Windows curl could not open MSYS `/tmp`; reran with a temporary F: path and passed.
+- **Tests/commands executed:** final frontend Vitest **20/20 pass**; Oxlint pass; TypeScript + Vite production build pass. Live via Vite proxy: SPA deep route 200; admin login/refresh 200; books/members/loans/config lists 200; Book create 201/update 200/archive 204; CSV import count 1/archive 204; Member create 201/update 200/disable 204; maintenance ON 200 → normal API 503 → control 200 → OFF 200 → normal API 200.
+- **Result:** P0-A core frontend complete; P0-B extended auth and final demo documentation remain.
+- **Commits:** `251395b`, `3f69feb`, `a05b07b`, `dcc27a7`, `5d03e8b`, `9720fee`, `ead3e9d`, `cf52df6`; docs commit/merge reported after creation.

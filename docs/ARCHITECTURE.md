@@ -40,6 +40,26 @@ HTTP → TraceIdFilter (MDC traceId + X-Trace-Id header)
 - Refresh token: opaque random, 7 days, **HttpOnly + SameSite=Lax cookie** (`path=/api/auth`), rotation + reuse detection (revoke family), only SHA-256 hash persisted.
 - Logout: revoke refresh session + insert `revoked_access_tokens(jti, expires_at)`.
 
+## Frontend architecture
+
+```text
+BrowserRouter
+  ├─ PublicLayout: landing → URL-backed catalog → book detail
+  ├─ AuthLayout: registration → email verification → login
+  └─ RequireAuth → AppShell
+       ├─ USER: active loans → confirmed return → history
+       └─ RequireAuth(admin): books / CSV / members / loans / maintenance
+```
+
+- `session-store.ts` holds access token + user in module memory only; no Web Storage token keys exist.
+- Axios attaches the bearer token, serializes concurrent 401 recovery behind one refresh promise, rotates
+  through the HttpOnly cookie, retries each request once and clears identity if refresh fails.
+- React Query owns server state and invalidation; auth/maintenance remain small client-state contexts.
+- Catalog filters, allowlisted sort and page are URL state for deep links and predictable browser Back.
+- React Hook Form + Zod provide on-blur field validation; backend `ApiError.validationErrors` remain authoritative.
+- ADMIN screens are lazy route chunks; responsive layouts use semantic landmarks, visible focus, 44px targets,
+  reduced-motion behavior and explicit loading/error/empty/success states.
+
 ## Deployment model (demo = local)
 
 ```

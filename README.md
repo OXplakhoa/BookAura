@@ -11,7 +11,7 @@ built as a **modular monolith** (Spring Boot + React SPA + PostgreSQL).
 | Layer     | Choice |
 |-----------|--------|
 | Backend   | Java 17, Spring Boot 3.5.x, Spring Data JPA, Spring Security (JWT), Bean Validation, Liquibase, Log4j2, AOP, Springdoc OpenAPI |
-| Frontend  | React 18, TypeScript, Vite, React Router, TanStack Query, React Hook Form + Zod, Tailwind CSS |
+| Frontend  | React 19, TypeScript, Vite, React Router, TanStack Query, Axios, React Hook Form + Zod, Tailwind CSS |
 | Database  | PostgreSQL 16 — local: Docker, tests: Testcontainers, demo: Supabase (Postgres only, **no Supabase Auth**) |
 | Mail      | `EmailSender` abstraction — local: Mailpit, demo: Brevo SMTP via env vars |
 | SMS       | `SmsSender` abstraction — `FakeSmsSender` (console) for local demo only |
@@ -47,7 +47,12 @@ cd backend
 cd frontend
 npm install
 npm run dev
-# SPA: http://localhost:5173
+# SPA: http://localhost:5173 (Vite proxies /api to localhost:8080)
+
+# Frontend quality gate
+npm test
+npm run lint
+npm run build
 ```
 
 Local demo account (seeded only in `local` profile): `admin / admin`.
@@ -78,6 +83,15 @@ errors are returned by row (for example `row[3].isbn`).
 Observability: every response carries `X-Trace-Id`; Log4j2 writes console + rolling file logs;
 HTTP bodies are bounded/redacted (auth bodies suppressed), and `@LogOperation` AOP records
 service outcome/duration without arguments or return values.
+
+## Implemented frontend journeys
+
+- Public editorial landing page, URL-backed catalog filters, availability and book detail.
+- Registration, email-link verification and login; access token is memory-only, refresh cookie is HttpOnly.
+- Member borrow, active loans, due/overdue state, confirmed return and permanent history.
+- ADMIN route-guarded workspaces: Book CRUD/archive/CSV, Member search/CRUD/disable,
+  loan oversight/admin return and maintenance control.
+- Responsive app shell, accessible forms/dialogs, error/empty/loading states and lazy ADMIN routes.
 
 ## Environment variables
 
