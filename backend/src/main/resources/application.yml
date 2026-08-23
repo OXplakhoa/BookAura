@@ -5,6 +5,9 @@ spring:
     hibernate:
       ddl-auto: validate        # Liquibase is the only schema owner (D11)
     open-in-view: false         # force explicit fetching, no lazy loading in views
+    properties:
+      hibernate:
+        default_batch_fetch_size: 50  # bounded pages: batch lazy to-one/collections, avoid N+1
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
   servlet:
