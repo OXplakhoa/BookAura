@@ -7,7 +7,7 @@ import { OAuthCallbackPage } from "./OAuthCallbackPage";
 function authValue(completeOAuth: AuthContextValue["completeOAuth"]): AuthContextValue {
   return {
     user: null, ready: true, authenticated: false, isAdmin: false,
-    signIn: vi.fn(), signUp: vi.fn(), signOut: vi.fn(), completeOAuth,
+    signIn: vi.fn(), signUp: vi.fn(), signOut: vi.fn(), completeOAuth, syncUser: vi.fn(),
   };
 }
 
