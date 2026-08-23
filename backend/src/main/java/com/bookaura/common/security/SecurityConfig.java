@@ -1,6 +1,8 @@
 package com.bookaura.common.security;
 
 import com.bookaura.common.error.ApiError;
+import com.bookaura.systemconfig.filter.MaintenanceModeFilter;
+import com.bookaura.systemconfig.service.SystemConfigurationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
@@ -38,7 +40,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
-                                                   CorsConfigurationSource corsConfigurationSource)
+                                                   CorsConfigurationSource corsConfigurationSource,
+                                                   SystemConfigurationService systemConfigurationService)
             throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -77,7 +80,11 @@ public class SecurityConfig {
                                 writeError(res, HttpServletResponse.SC_FORBIDDEN, "ACCESS_DENIED",
                                         "You do not have permission to access this resource", req.getRequestURI()))
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                // CORS + JWT run first; maintenance blocks before URL/method authorization.
+                // The skipped admin-control endpoint still continues to authoritative @PreAuthorize.
+                .addFilterAfter(new MaintenanceModeFilter(systemConfigurationService, objectMapper),
+                        UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
