@@ -10,6 +10,7 @@ export interface AuthContextValue {
   signIn: (input: LoginInput) => Promise<UserSummary>;
   signUp: (input: RegisterInput) => Promise<string>;
   completeOAuth: (code: string) => Promise<UserSummary>;
+  syncUser: (user: UserSummary) => void;
   signOut: () => Promise<void>;
 }
 

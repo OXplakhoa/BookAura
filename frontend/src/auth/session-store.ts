@@ -19,6 +19,12 @@ export function setSession(response: AuthResponse): void {
   listeners.forEach((listener) => listener(snapshot));
 }
 
+export function setSessionUser(user: UserSummary): void {
+  if (!snapshot.accessToken) return;
+  snapshot = { ...snapshot, user };
+  listeners.forEach((listener) => listener(snapshot));
+}
+
 export function clearSession(): void {
   snapshot = { accessToken: null, user: null };
   listeners.forEach((listener) => listener(snapshot));

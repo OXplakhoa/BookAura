@@ -14,7 +14,7 @@ class SafePayloadSanitizerTest {
     @Test
     void recursivelyRedactsSensitiveFieldsWithoutLosingSafeContext() {
         String json = """
-                {"email":"reader@test.dev","initialPassword":"secret1","nested":{
+                {"email":"reader@test.dev","newEmail":"new@test.dev","initialPassword":"secret1","nested":{
                 "access_token":"jwt-value","verificationCode":"123456"},
                 "items":[{"clientSecret":"oauth-secret","title":"Clean Code"}]}
                 """;
@@ -22,7 +22,7 @@ class SafePayloadSanitizerTest {
 
         assertThat(sanitized).contains("Clean Code", "[REDACTED]");
         assertThat(sanitized).doesNotContain(
-                "reader@test.dev", "secret1", "jwt-value", "123456", "oauth-secret");
+                "reader@test.dev", "new@test.dev", "secret1", "jwt-value", "123456", "oauth-secret");
     }
 
     @Test

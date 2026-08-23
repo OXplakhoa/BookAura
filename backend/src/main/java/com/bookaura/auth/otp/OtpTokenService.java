@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Issues and consumes one-time secrets for every verification flow.
@@ -24,9 +25,11 @@ public class OtpTokenService {
     private static final Duration RESEND_COOLDOWN = Duration.ofSeconds(60);
 
     private final OtpTokenRepository repository;
+    private final OtpAttemptRecorder attemptRecorder;
 
-    public OtpTokenService(OtpTokenRepository repository) {
+    public OtpTokenService(OtpTokenRepository repository, OtpAttemptRecorder attemptRecorder) {
         this.repository = repository;
+        this.attemptRecorder = attemptRecorder;
     }
 
     /** Creates a new secret (enforcing resend cooldown) and returns the RAW value to deliver out-of-band. */
@@ -58,6 +61,41 @@ public class OtpTokenService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID,
                         "Invalid or unknown verification code"));
 
+        validateState(token);
+        return token;
+    }
+
+    /**
+     * Authenticated six-digit flow: bind validation to the current user and latest purpose token.
+     * Wrong attempts commit in REQUIRES_NEW; correct consumption is one atomic conditional update.
+     */
+    @Transactional
+    public ConsumedOtp consumeLatestCode(UserAccount user, OtpPurpose purpose, String rawCode) {
+        OtpToken token = repository.findTopByUserAccountAndPurposeOrderByLastSentAtDesc(user, purpose)
+                .orElseThrow(() -> new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID,
+                        "Invalid or unknown verification code"));
+        validateState(token);
+        String suppliedHash = HashUtils.sha256Hex(rawCode == null ? "" : rawCode.trim());
+        if (!HashUtils.constantTimeEquals(token.getCodeHash(), suppliedHash)) {
+            attemptRecorder.record(token.getId());
+            throw new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID, "Invalid verification code");
+        }
+        Instant now = Instant.now();
+        int consumed = repository.consumeIfUsable(token.getId(), user.getId(), purpose, suppliedHash,
+                now, OtpToken.MAX_ATTEMPTS);
+        if (consumed != 1) {
+            throw new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID,
+                    "This code is invalid, expired, or already used");
+        }
+        return new ConsumedOtp(token.getId(), token.getTarget());
+    }
+
+    @Transactional
+    public void markConsumed(OtpToken token) {
+        token.setConsumedAt(Instant.now());
+    }
+
+    private void validateState(OtpToken token) {
         if (token.getConsumedAt() != null) {
             throw new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID, "This code has already been used");
         }
@@ -68,16 +106,8 @@ public class OtpTokenService {
             throw new BusinessException(ErrorCode.VERIFICATION_TOKEN_INVALID,
                     "Too many failed attempts; request a new code");
         }
-        return token;
     }
 
-    @Transactional
-    public void registerFailedAttempt(OtpToken token) {
-        token.setAttempts(token.getAttempts() + 1);
-    }
-
-    @Transactional
-    public void markConsumed(OtpToken token) {
-        token.setConsumedAt(Instant.now());
+    public record ConsumedOtp(UUID tokenId, String target) {
     }
 }

@@ -115,3 +115,27 @@ Implemented details:
 - Redirect code is URL-safe, DB stores SHA-256 only, and an atomic conditional update permits one exchange.
 - React removes `?code=` from browser history before POSTing it, then uses the normal memory access token + HttpOnly refresh cookie.
 - A transient `JSESSIONID` stores OAuth authorization state only and is invalidated by success/failure handlers.
+
+## Change registered email (P0-B)
+
+```mermaid
+sequenceDiagram
+    participant FE as React Account Settings
+    participant BE as Spring Boot
+    participant DB as PostgreSQL
+    participant M as EmailSender
+
+    FE->>BE: POST /api/account/email-change/request {newEmail} + Bearer
+    BE->>DB: ensure new email unique; insert CHANGE_EMAIL SHA-256 code (10m)
+    BE->>M: send raw six-digit code to new email
+    Note over DB: Current account email is unchanged
+    FE->>BE: POST /api/account/email-change/confirm {code} + Bearer
+    BE->>DB: latest token for authenticated user/purpose; atomic unused→consumed
+    BE->>DB: update user_accounts.email + email_verified_at
+    BE-->>FE: refreshed UserSummary
+```
+
+Wrong code hashes are constant-time compared. Each failed attempt is recorded in `REQUIRES_NEW`, because the
+outer request deliberately throws 400 and would otherwise roll the counter back. Five failures lock the token;
+resend cooldown is 60 seconds. Confirmation rechecks the unique email immediately before flush, and duplicate
+races return 409. The existing JWT remains valid because identity is the immutable UUID `sub`, not email.

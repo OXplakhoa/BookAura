@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { clearSession, getSession, setSession, subscribeSession } from "./session-store";
+import { clearSession, getSession, setSession, setSessionUser, subscribeSession } from "./session-store";
 
 const authResponse = {
   accessToken: "memory-only-token",
@@ -20,6 +20,15 @@ describe("session store", () => {
     expect(getSession()).toEqual({ accessToken: "memory-only-token", user: authResponse.user });
     expect(listener).toHaveBeenCalledWith(getSession());
     unsubscribe();
+  });
+
+  it("updates returned profile data without replacing the access token", () => {
+    setSession(authResponse);
+    setSessionUser({ ...authResponse.user, email: "changed@test.dev" });
+    expect(getSession()).toEqual({
+      accessToken: "memory-only-token",
+      user: { ...authResponse.user, email: "changed@test.dev" },
+    });
   });
 
   it("removes both identity and access token on clear", () => {

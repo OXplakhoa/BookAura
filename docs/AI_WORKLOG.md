@@ -140,4 +140,16 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Problems found/corrections:** first targeted context failed before assertions because Liquibase used `char(64)` while JPA expected `varchar(64)` for `code_hash`; corrected unpublished `0011`, fresh migration and tests passed. OAuth local-origin review found that proxying the start URL through Vite could place `JSESSIONID` on 5173 while Google callback targets 8080; frontend therefore starts OAuth directly on `VITE_OAUTH_BASE_URL` (8080 in dev). Oxlint flagged immediate error `setState` in callback effect; derived initial error state instead.
 - **Tests/commands executed:** OAuth integration **3/3 pass**; final backend `verify` **53/53 pass**; frontend **22/22 pass**, lint/build pass. Dummy-credential live wiring: provider availability true; authorization endpoint 302 to Google with `openid profile email`, transient HttpOnly session cookie, callback URI on backend. Real Google token/consent not claimed because credentials are unavailable.
 - **Result:** Google OAuth architecture/domain/UI complete and credential-ready; next P0-B item is email OTP/change email.
-- **Commits:** `030477f`, `f8349b9`, `b91486c`, `b7830cc`, `a9d2c4a`; docs commit/merge reported after creation.
+- **Commits:** `030477f`, `f8349b9`, `b91486c`, `b7830cc`, `a9d2c4a`; docs `dd2a219`; merge `afb8a6e`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Verified change-email OTP
+
+- **Goal:** change registered email only after a robust six-digit verification lifecycle to the new inbox.
+- **Files:** OTP repository/service hardening + `OtpAttemptRecorder`; account DTO/service/controller; Account Settings React page/session sync; logging redaction/tests; auth/architecture/decision docs.
+- **Important review points:** lookup is latest token bound to authenticated UUID + CHANGE_EMAIL purpose, not global six-digit hash. SHA-256 comparison is constant-time. Wrong attempts use `REQUIRES_NEW`; correct consumption is one conditional SQL update. New email remains only token target until confirmation, then uniqueness is rechecked and account email/verified timestamp update together. JWT `sub` remains UUID, so current session is valid.
+- **Problems found/corrections:** recognized that incrementing attempts in the rejected outer transaction would silently roll back (same class of bug as refresh reuse); isolated recorder transaction and proved count=5. Removed `clearAutomatically` from OTP bulk updates because it would detach the loaded user before summary mapping. Targeted test logs exposed raw `newEmail` because redaction matched exact `email`; extended sanitizer to email/phone suffixes and confirmed `[REDACTED]` in final logs.
+- **Tests/commands executed:** targeted email change **3/3 pass**; final backend `verify` **56/56 pass**; frontend **23/23 pass**, lint/build pass. Tests cover unchanged-before-confirm, delivered code success, replay, five wrong attempts persisted, correct-after-lockout rejection, resend cooldown and duplicate email. Live through Vite + Mailpit: ADMIN-created verified member → USER login → request 200 → six-digit SMTP capture → confirm 200 → `/me` returned changed email → cleanup disable 204.
+- **Result:** Email OTP/change-email P0-B complete; next item is mocked phone OTP.
+- **Commits:** `0eee857`, `328c369`, `77302de`, `348d4c8`, `2d72c0d`; docs commit/merge reported after creation.
