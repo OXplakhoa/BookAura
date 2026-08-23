@@ -41,6 +41,7 @@ public class SmtpEmailSender implements EmailSender {
         message.setSubject(subject);
         message.setText(body);
         mailSender.send(message);
-        log.info("Email sent to={} subject={}", to, subject);
+        // Destination email is PII; delivery metadata is enough for production logs.
+        log.info("Email sent subject={}", subject);
     }
 }
