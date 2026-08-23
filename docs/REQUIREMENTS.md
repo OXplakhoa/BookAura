@@ -8,9 +8,11 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 - ✅ Bootstrap + Auth Core (P0-A #1–9): implemented; auth regression suite passing.
 - ✅ Book backend (P0-A #10–14): CRUD, soft delete, ISBN validation, Specification filters,
   page size max 10, multi-sort allowlist, CSV policy + row errors + transactional rollback proof.
-- ⏳ Book frontend remains part of #31; Member, Loan, Maintenance and P0-B remain pending.
-- Evidence: `./mvnw verify` = **29 tests, 0 failures/errors**; frontend `npm run build` pass;
-  local Liquibase upgraded existing DB through `0008-catalog-schema` and health returned UP.
+- ✅ Loan backend (P0-A #17–20): borrow/return, active/history, final-copy atomic concurrency,
+  duplicate guards, USER ownership + ADMIN override, borrow/return rollback proofs.
+- ⏳ Core frontend remains part of #31; Member search, Maintenance and P0-B remain pending.
+- Evidence: `./mvnw verify` = **37 tests, 0 failures/errors**; frontend `npm run build` pass;
+  local Liquibase upgraded existing DB through `0009-loans`; live borrow 201 + return 200 passed.
 
 ## P0-A — Must work (demo-critical)
 

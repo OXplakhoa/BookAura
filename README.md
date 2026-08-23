@@ -57,6 +57,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 - Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`
 - Public catalog: `GET /api/books`, `GET /api/books/{id}`
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
+- Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
+  ADMIN management under `/api/admin/loans`.
 - Multi-sort example: `?sort=publicationYear:desc,title:asc`; maximum page size is 10.
 
 CSV header is exact; author/category lists use `|`:

@@ -60,4 +60,20 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
   - `npm run build` → pass.
   - Local profile smoke: health `UP`; Liquibase applied `0008-catalog-schema`; 5 catalog tables present; admin created a book (201); unauthenticated multi-condition public search returned it.
 - **Result:** Book Management backend P0-A slice complete; frontend screens remain pending.
-- **Commits:** `cec9dd6`, `83c8e63`, `248d68f`, `263edac`; docs commit reported after creation.
+- **Commits:** `cec9dd6`, `83c8e63`, `248d68f`, `263edac`; docs `54c4b7b`; merge `40d7d47`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Borrow / Return slice
+
+- **Goal:** deliver P0-A transactional loan flow before Member search so Member can later query real borrowed-book relationships.
+- **Prompt summary:** continue implementation and commit each completed feature separately.
+- **Files:** `loan/**`, `MemberProfileRepository`, conditional inventory methods in `BookRepository`, Liquibase `0009-loans`, loan tests, architecture/requirements/ERD/decisions/README.
+- **Important review points:**
+  - One concurrency strategy: conditional `UPDATE` + affected row count; no pessimistic/optimistic lock mixing.
+  - DB partial unique index permits only one active loan per member/book, including concurrent requests.
+  - Return updates loan only when `returned_at IS NULL`; only that winner increments inventory.
+  - JPQL bulk update bypasses persistence-context synchronization; managed `Loan.returnedAt` is explicitly synchronized for response mapping.
+- **Tests/commands executed:** targeted loan **8/8 pass**; `./mvnw verify` **37/37 pass**; real two-thread final-copy test; forced borrow rollback; forced return rollback; local Liquibase `0009` + live borrow 201/return 200.
+- **Result:** Loan P0-A backend slice complete; Member management can now search real Loan→Book data.
+- **Commits:** `f74c141`, `32b012a`, `9979f60`; docs commit and merge reported after creation.
