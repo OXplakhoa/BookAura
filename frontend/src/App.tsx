@@ -13,6 +13,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { LoansPage } from "./pages/LoansPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
 
 const AdminBooksPage = lazy(() => import("./pages/admin/AdminBooksPage").then((module) => ({ default: module.AdminBooksPage })));
 const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage").then((module) => ({ default: module.AdminDashboardPage })));
@@ -42,6 +43,7 @@ export default function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
+        <Route path="oauth/callback" element={<OAuthCallbackPage />} />
       </Route>
 
       <Route element={<RequireAuth />}>

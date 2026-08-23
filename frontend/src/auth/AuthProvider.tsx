@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { login, logout, refreshSession, register, type LoginInput, type RegisterInput } from "./auth-api";
+import { exchangeOAuthCode, login, logout, refreshSession, register, type LoginInput, type RegisterInput } from "./auth-api";
 import { AuthContext, type AuthContextValue } from "./auth-context";
 import { clearSession, getSession, setSession, subscribeSession } from "./session-store";
 
@@ -26,6 +26,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return response.user;
     },
     signUp: async (input: RegisterInput) => (await register(input)).message,
+    completeOAuth: async (code: string) => {
+      const response = await exchangeOAuthCode(code);
+      setSession(response);
+      return response.user;
+    },
     signOut: async () => {
       try {
         if (getSession().accessToken) {

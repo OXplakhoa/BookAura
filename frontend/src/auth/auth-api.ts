@@ -29,6 +29,19 @@ export async function resendVerification(email: string): Promise<MessageResponse
   return (await api.post<MessageResponse>("/auth/resend-verification", { email })).data;
 }
 
+export async function getOAuthProviders(): Promise<{ google: boolean }> {
+  return (await api.get<{ google: boolean }>("/auth/oauth/providers")).data;
+}
+
+export async function exchangeOAuthCode(code: string): Promise<AuthResponse> {
+  return (await api.post<AuthResponse>("/auth/oauth/exchange", { code })).data;
+}
+
+export function googleAuthorizationUrl(): string {
+  const baseUrl = import.meta.env.VITE_OAUTH_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:8080" : "");
+  return `${baseUrl}/oauth2/authorization/google`;
+}
+
 export async function currentUser(): Promise<UserSummary> {
   return (await api.get<UserSummary>("/auth/me")).data;
 }
