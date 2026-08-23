@@ -3,6 +3,8 @@ import { RequireAuth } from "./auth/RequireAuth";
 import { AppShell } from "./layouts/AppShell";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
+import { BookDetailPage } from "./pages/BookDetailPage";
+import { CatalogPage } from "./pages/CatalogPage";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
 import { HomePage } from "./pages/HomePage";
 import { LoginPage } from "./pages/LoginPage";
@@ -21,7 +23,8 @@ export default function App() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="catalog" element={<PlaceholderPage title="Browse books" description="The searchable catalog is the next frontend concern in this feature branch." />} />
+        <Route path="catalog" element={<CatalogPage />} />
+        <Route path="books/:bookId" element={<BookDetailPage />} />
       </Route>
 
       <Route element={<AuthLayout />}>
