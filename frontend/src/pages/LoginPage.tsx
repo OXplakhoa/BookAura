@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { getOAuthProviders, googleAuthorizationUrl } from "../auth/auth-api";
 import { useAuth } from "../auth/use-auth";
 import { ApiErrorBanner } from "../components/ApiErrorBanner";
 import { FieldError } from "../components/FieldError";
@@ -22,6 +24,12 @@ export function LoginPage() {
   const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<DisplayError | null>(null);
+  const providers = useQuery({
+    queryKey: ["oauth-providers"],
+    queryFn: getOAuthProviders,
+    staleTime: Number.POSITIVE_INFINITY,
+    retry: false,
+  });
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
     mode: "onBlur",
@@ -44,6 +52,9 @@ export function LoginPage() {
       <h1 className="mt-3 font-display text-4xl font-bold tracking-tight">Return to your shelf</h1>
       <p className="mt-3 leading-7 text-muted">Sign in with the email or phone number connected to your library account.</p>
       <div className="mt-8"><ApiErrorBanner error={serverError} /></div>
+      <button type="button" className="button min-h-12 w-full border border-line bg-surface text-ink hover:bg-canvas" disabled={!providers.data?.google} onClick={() => window.location.assign(googleAuthorizationUrl())}>Continue with Google</button>
+      {providers.isSuccess && !providers.data.google && <p className="mt-2 text-center text-xs text-muted">Google sign-in is not configured in this environment.</p>}
+      <div className="my-6 flex items-center gap-4" aria-hidden="true"><span className="h-px flex-1 bg-line" /><span className="text-xs font-bold uppercase tracking-wider text-muted">or use password</span><span className="h-px flex-1 bg-line" /></div>
       <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5">
         <div>
           <label className="field-label" htmlFor="identifier">Email or phone</label>

@@ -1,6 +1,8 @@
 package com.bookaura.auth.controller;
 
 import com.bookaura.auth.dto.*;
+import com.bookaura.auth.oauth.OAuthLoginService;
+import com.bookaura.auth.oauth.OAuthProviderAvailability;
 import com.bookaura.auth.service.AuthService;
 import com.bookaura.auth.token.RefreshCookieService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,10 +27,15 @@ public class AuthController {
 
     private final AuthService authService;
     private final RefreshCookieService cookieService;
+    private final OAuthLoginService oauthLoginService;
+    private final OAuthProviderAvailability oauthProviders;
 
-    public AuthController(AuthService authService, RefreshCookieService cookieService) {
+    public AuthController(AuthService authService, RefreshCookieService cookieService,
+                          OAuthLoginService oauthLoginService, OAuthProviderAvailability oauthProviders) {
         this.authService = authService;
         this.cookieService = cookieService;
+        this.oauthLoginService = oauthLoginService;
+        this.oauthProviders = oauthProviders;
     }
 
     @Operation(summary = "Register with email + password; sends verification email")
@@ -58,6 +65,19 @@ public class AuthController {
     public AuthResponse login(@Valid @RequestBody LoginRequest request,
                               HttpServletRequest http, HttpServletResponse response) {
         return toAuthResponse(authService.login(request, http), response);
+    }
+
+    @Operation(summary = "List configured OAuth providers without exposing client credentials")
+    @GetMapping("/oauth/providers")
+    public OAuthProvidersResponse oauthProviders() {
+        return new OAuthProvidersResponse(oauthProviders.isGoogleConfigured());
+    }
+
+    @Operation(summary = "Exchange a 60-second single-use OAuth redirect code for the normal app session")
+    @PostMapping("/oauth/exchange")
+    public AuthResponse exchangeOAuth(@Valid @RequestBody OAuthExchangeRequest request,
+                                      HttpServletRequest http, HttpServletResponse response) {
+        return toAuthResponse(oauthLoginService.exchange(request.code(), http), response);
     }
 
     @Operation(summary = "Rotate refresh token (HttpOnly cookie) -> new access token + new cookie")

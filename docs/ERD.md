@@ -1,6 +1,6 @@
 # ERD
 
-Implemented now: auth-core, catalog, `loans`, and singleton `system_configuration` (through Liquibase `0010`). Later audit/recommendation tables remain planned.
+Implemented now: auth-core including Google identity/exchange, catalog, `loans`, and singleton `system_configuration` (through Liquibase `0011`). Later audit/recommendation tables remain planned.
 
 ```mermaid
 erDiagram
@@ -9,6 +9,8 @@ erDiagram
     user_accounts ||--|| member_profiles : "1-1"
     user_accounts ||--o{ refresh_sessions : owns
     user_accounts ||--o{ otp_tokens : receives
+    user_accounts ||--o{ oauth_identities : links
+    user_accounts ||--o{ oauth_exchange_codes : exchanges
     member_profiles ||--o{ loans : borrows
     books ||--o{ loans : "loaned as"
     books ||--o{ book_authors : has
@@ -45,6 +47,19 @@ erDiagram
         varchar user_agent
     }
     revoked_access_tokens { varchar jti PK  timestamptz expires_at }
+    oauth_identities {
+        uuid id PK
+        uuid user_account_id FK
+        varchar provider "GOOGLE"
+        varchar provider_subject "stable provider id"
+    }
+    oauth_exchange_codes {
+        uuid id PK
+        varchar code_hash UK "SHA-256; raw code only in redirect"
+        uuid user_account_id FK
+        timestamptz expires_at "60 seconds"
+        timestamptz consumed_at "single use"
+    }
     otp_tokens {
         uuid id PK
         uuid user_account_id FK "nullable for phone-login targets"

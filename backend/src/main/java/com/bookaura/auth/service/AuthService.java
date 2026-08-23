@@ -149,6 +149,23 @@ public class AuthService {
     }
 
     @Transactional
+    public LoginResult loginFromOAuthExchange(UUID userId, HttpServletRequest http) {
+        UserAccount user = userRepository.findWithRolesById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.OAUTH_EXCHANGE_INVALID, "Account not found"));
+        if (user.getStatus() == AccountStatus.DISABLED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED, "Account is disabled");
+        }
+        if (user.getEmailVerifiedAt() == null) {
+            throw new BusinessException(ErrorCode.OAUTH_EMAIL_NOT_VERIFIED, "Email is not verified");
+        }
+        JwtService.IssuedToken access = jwtService.createAccessToken(user);
+        RefreshTokenService.IssuedSession refresh = refreshTokenService.issue(user, http.getRemoteAddr(),
+                http.getHeader("User-Agent"));
+        AUDIT.info("event=OAUTH_LOGIN_SUCCESS userId={}", user.getId());
+        return new LoginResult(access, refresh.rawToken(), refresh.expiresAt(), toSummary(user));
+    }
+
+    @Transactional
     public LoginResult refresh(String rawRefreshToken, HttpServletRequest http) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new BusinessException(ErrorCode.REFRESH_MISSING, "Refresh cookie is missing");

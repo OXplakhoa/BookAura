@@ -59,7 +59,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 
 ## Implemented API slices
 
-- Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`
+- Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`;
+  optional Google OIDC starts at `/oauth2/authorization/google` and exchanges at `/api/auth/oauth/exchange`.
 - Public catalog: `GET /api/books`, `GET /api/books/{id}`
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
 - Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
@@ -96,8 +97,8 @@ service outcome/duration without arguments or return values.
 ## Environment variables
 
 See `.env.example`. Real secrets go in a local `.env` file — **never committed**
-(`.gitignore` enforces this). Demo email uses Brevo SMTP; Google OAuth uses
-localhost callback URLs.
+(`.gitignore` enforces this). Demo email uses Brevo SMTP. Google OAuth is enabled only when both `GOOGLE_CLIENT_ID` and
+`GOOGLE_CLIENT_SECRET` are non-blank; local callback: `http://localhost:8080/login/oauth2/code/google`.
 
 ## Docs
 

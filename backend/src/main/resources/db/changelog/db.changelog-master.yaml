@@ -21,3 +21,5 @@ databaseChangeLog:
       file: db/changelog/changesets/0009-loans.yaml
   - include:
       file: db/changelog/changesets/0010-system-configuration.yaml
+  - include:
+      file: db/changelog/changesets/0011-google-oauth.yaml

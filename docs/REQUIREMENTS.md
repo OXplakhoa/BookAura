@@ -18,8 +18,11 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 - ✅ Core React frontend (#31): auth/session restoration, URL-backed public catalog/detail,
   member borrow/active/return/history, ADMIN Book/CSV/Member/Loan/Maintenance workspaces,
   responsive/a11y states and route splitting.
-- ⏳ P0-B extended auth remains pending.
-- Evidence: `./mvnw verify` = **50 backend tests, 0 failures/errors**; frontend **20 tests**,
+- ✅ Google OAuth P0-B (#32): optional Google OIDC registration, verified-email identity link/create,
+  60-second hashed single-use exchange code, normal access/refresh session and React callback cleanup.
+  Domain/filter wiring is tested without secrets; real Google consent remains credential-dependent.
+- ⏳ Email OTP/change email, mocked phone OTP and Facebook remain pending.
+- Evidence: `./mvnw verify` = **53 backend tests, 0 failures/errors**; frontend **22 tests**,
   Oxlint and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
   Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
   maintenance 200→503→200 all passed.
@@ -50,7 +53,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
 ## P0-B — Required by mentor note, must not block P0-A (in this order)
 
-32. Google OAuth (Spring Security OAuth2 Client; backend callback → one-time code → session; no tokens in URL)
+32. ✅ Google OAuth (Spring Security OAuth2 Client; backend callback → one-time code → session; no tokens in URL)
 33. Email OTP / change email (code to new email, change only after verify)
 34. Phone OTP with mocked `SmsSender` (full OTP lifecycle: hash, expiry, cooldown, attempt limit, one-time, purpose, audit)
 35. Facebook OAuth (same architecture; document and skip if it becomes a time sink)

@@ -1,0 +1,97 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0011-google-oauth
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: oauth_identities
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_oauth_identity_user
+                    references: user_accounts(id)
+              - column:
+                  name: provider
+                  type: varchar(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: provider_subject
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: oauth_identities
+            columnNames: provider, provider_subject
+            constraintName: uk_oauth_provider_subject
+        - addUniqueConstraint:
+            tableName: oauth_identities
+            columnNames: provider, user_account_id
+            constraintName: uk_oauth_provider_user
+        - createIndex:
+            tableName: oauth_identities
+            indexName: idx_oauth_identity_user
+            columns:
+              - column:
+                  name: user_account_id
+        - createTable:
+            tableName: oauth_exchange_codes
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code_hash
+                  type: varchar(64)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_oauth_exchange_code_hash
+              - column:
+                  name: user_account_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_oauth_exchange_user
+                    references: user_accounts(id)
+              - column:
+                  name: expires_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consumed_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createIndex:
+            tableName: oauth_exchange_codes
+            indexName: idx_oauth_exchange_expiry
+            columns:
+              - column:
+                  name: expires_at

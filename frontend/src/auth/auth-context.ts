@@ -9,6 +9,7 @@ export interface AuthContextValue {
   isAdmin: boolean;
   signIn: (input: LoginInput) => Promise<UserSummary>;
   signUp: (input: RegisterInput) => Promise<string>;
+  completeOAuth: (code: string) => Promise<UserSummary>;
   signOut: () => Promise<void>;
 }
 
