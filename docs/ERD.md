@@ -1,6 +1,6 @@
 # ERD
 
-Implemented now: auth-core and catalog tables (`books`, `authors`, `categories`, join tables). `loans` and later-slice tables remain planned.
+Implemented now: auth-core, catalog, and `loans` (through Liquibase `0009`). Later system-config/audit/recommendation tables remain planned.
 
 ```mermaid
 erDiagram

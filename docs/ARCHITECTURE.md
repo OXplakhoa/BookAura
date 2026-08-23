@@ -55,14 +55,17 @@ React SPA (localhost:5173) ──HTTPS/HTTP──▶ Spring Boot (localhost:8080
 | Use case | Boundary | Rollback demo |
 |----------|----------|---------------|
 | `LoanService.borrow` | `@Transactional`: conditional inventory decrement + insert Loan | forced failure test rolls back both |
-| `LoanService.returnBook` | `@Transactional`: mark returned + increment inventory | duplicate return rejected safely |
-| `CsvImportService` | one TX for whole file; any invalid row → throw → rollback | invalid-row import leaves 0 rows |
+| `LoanService.returnOwn/returnAsAdmin` | `@Transactional`: conditional NULL→returned update + conditional inventory increment | forced failure rolls both mutations back; duplicate return affects 0 rows |
+| `CsvImportService` | one TX: bulk relation resolution + `saveAll+flush` | test-only post-flush failure rolls books/authors/categories back |
 
-Borrow concurrency: **atomic conditional update**
-(`UPDATE books SET available_quantity = available_quantity - 1 WHERE id = ? AND available_quantity > 0`,
-affected-row count decides). No pessimistic+optimistic mixing.
+Concurrency uses one concept only: **atomic conditional update + affected-row count**.
+Borrow decrements only when `available_quantity > 0`; return changes only an active loan and increments only
+when `available_quantity < total_quantity`. No pessimistic/optimistic lock combination.
+The partial unique index on `(member_profile_id, book_id) WHERE returned_at IS NULL` closes the concurrent
+same-member/same-book race; a losing transaction rolls its inventory decrement back.
 
 ## Logging / observability
 
-Log4j2 (console + rolling file `logs/bookaura.log`), MDC `traceId` per request (also in error JSON),
-AOP `@Around` on services for duration + audit events, redaction: passwords/tokens/OTP/Authorization never logged.
+Implemented: Log4j2 console + rolling file, MDC `traceId`, security/business audit logger.
+Pending observability slice: redacted request/response logging and AOP service duration logging.
+Passwords/tokens/OTP/Authorization are never logged.

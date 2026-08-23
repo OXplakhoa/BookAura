@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0009-loans
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: loans
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: member_profile_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_loans_member
+                    references: member_profiles(id)
+              - column:
+                  name: book_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_loans_book
+                    references: books(id)
+              - column:
+                  name: borrowed_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: due_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: returned_at
+                  type: timestamptz
+        - createIndex:
+            tableName: loans
+            indexName: idx_loans_member_borrowed
+            columns:
+              - column:
+                  name: member_profile_id
+              - column:
+                  name: borrowed_at
+        - createIndex:
+            tableName: loans
+            indexName: idx_loans_book
+            columns:
+              - column:
+                  name: book_id
+        - createIndex:
+            tableName: loans
+            indexName: idx_loans_due_active
+            columns:
+              - column:
+                  name: due_at
+              - column:
+                  name: returned_at
+        - sql:
+            dbms: postgresql
+            sql: >-
+              ALTER TABLE loans ADD CONSTRAINT ck_loans_due_after_borrow
+              CHECK (due_at > borrowed_at)
+        - sql:
+            dbms: postgresql
+            sql: >-
+              CREATE UNIQUE INDEX uq_loans_active_member_book
+              ON loans (member_profile_id, book_id)
+              WHERE returned_at IS NULL
