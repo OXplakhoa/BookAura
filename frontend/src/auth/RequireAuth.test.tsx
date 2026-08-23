@@ -11,6 +11,7 @@ const baseAuth: AuthContextValue = {
   isAdmin: false,
   signIn: vi.fn(),
   signUp: vi.fn(),
+  completeOAuth: vi.fn(),
   signOut: vi.fn(),
 };
 
