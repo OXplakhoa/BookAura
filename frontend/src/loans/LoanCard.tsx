@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { formatDate, formatDateTime } from "../lib/date-format";
 import type { Loan } from "./loan-types";
 
-export function LoanCard({ loan, active, onReturn }: { loan: Loan; active: boolean; onReturn?: (loan: Loan) => void }) {
+export function LoanCard({ loan, active, onReturn, showMember = false }: { loan: Loan; active: boolean; onReturn?: (loan: Loan) => void; showMember?: boolean }) {
   return (
     <article className="grid gap-5 border border-line bg-surface p-5 sm:grid-cols-[76px_1fr_auto] sm:items-center">
       <div className="grid aspect-[2/3] w-[68px] place-items-center rounded-r-md bg-book-navy text-white shadow-md" aria-hidden="true"><BookOpen size={25} /></div>
@@ -13,6 +13,7 @@ export function LoanCard({ loan, active, onReturn }: { loan: Loan; active: boole
           <span className="inline-flex items-center gap-1.5 text-xs tabular-nums text-muted"><Hash size={14} />{loan.isbn}</span>
         </div>
         <h2 className="mt-2 font-display text-xl font-bold">{loan.bookTitle}</h2>
+        {showMember && <p className="mt-1 text-sm font-semibold text-primary">Member: {loan.memberName}</p>}
         <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
           <span>Borrowed <strong className="font-semibold text-ink">{formatDate(loan.borrowedAt)}</strong></span>
           {active ? <span className="inline-flex items-center gap-1.5"><CalendarClock size={16} />Due <strong className={loan.overdue ? "text-danger" : "text-ink"}>{formatDate(loan.dueAt)}</strong></span>
