@@ -1,6 +1,6 @@
 # ERD
 
-Implemented now: auth-core tables. Planned (later slices) shown for context.
+Implemented now: auth-core and catalog tables (`books`, `authors`, `categories`, join tables). `loans` and later-slice tables remain planned.
 
 ```mermaid
 erDiagram

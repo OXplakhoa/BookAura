@@ -3,6 +3,15 @@
 Product: **BookAura** — library management system. Browse → borrow → return → history.
 NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
+## Implementation status (verified 2026-08-23)
+
+- ✅ Bootstrap + Auth Core (P0-A #1–9): implemented; auth regression suite passing.
+- ✅ Book backend (P0-A #10–14): CRUD, soft delete, ISBN validation, Specification filters,
+  page size max 10, multi-sort allowlist, CSV policy + row errors + transactional rollback proof.
+- ⏳ Book frontend remains part of #31; Member, Loan, Maintenance and P0-B remain pending.
+- Evidence: `./mvnw verify` = **29 tests, 0 failures/errors**; frontend `npm run build` pass;
+  local Liquibase upgraded existing DB through `0008-catalog-schema` and health returned UP.
+
 ## P0-A — Must work (demo-critical)
 
 | # | Requirement | Acceptance highlight |
