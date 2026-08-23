@@ -7,6 +7,7 @@ import com.bookaura.catalog.specification.BookSpecifications;
 import com.bookaura.catalog.validation.IsbnUtils;
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
+import com.bookaura.common.logging.LogOperation;
 import com.bookaura.common.web.PageResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Service
+@LogOperation
 public class BookService {
 
     private final BookRepository bookRepository;
