@@ -12,6 +12,7 @@ import com.bookaura.auth.token.JwtService;
 import com.bookaura.auth.token.RefreshTokenService;
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
+import com.bookaura.common.logging.LogOperation;
 import com.bookaura.common.util.PhoneNormalizer;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +33,7 @@ import java.util.UUID;
  * Audit log lines use the dedicated "com.bookaura.audit" logger and never contain secrets.
  */
 @Service
+@LogOperation
 public class AuthService {
 
     private static final Logger AUDIT = LoggerFactory.getLogger("com.bookaura.audit");
@@ -94,7 +96,7 @@ public class AuthService {
         String rawToken = otpTokenService.createToken(user, email, OtpPurpose.EMAIL_VERIFICATION,
                 VERIFICATION_TTL, false);
         emailSender.sendVerificationEmail(email, frontendUrl + "/verify-email?token=" + rawToken);
-        AUDIT.info("event=REGISTER userId={} email={}", user.getId(), email);
+        AUDIT.info("event=REGISTER userId={}", user.getId());
     }
 
     @Transactional
@@ -128,7 +130,7 @@ public class AuthService {
         UserAccount user = findByIdentifier(request.identifier());
         if (user == null || !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             // Deliberately identical message: do not reveal which part failed.
-            AUDIT.info("event=LOGIN_FAILED identifier={}", request.identifier());
+            AUDIT.info("event=LOGIN_FAILED reason=INVALID_CREDENTIALS");
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS, "Invalid credentials");
         }
         if (user.getEmailVerifiedAt() == null) {

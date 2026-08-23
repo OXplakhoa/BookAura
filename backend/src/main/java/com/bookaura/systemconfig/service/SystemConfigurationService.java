@@ -1,5 +1,6 @@
 package com.bookaura.systemconfig.service;
 
+import com.bookaura.common.logging.LogOperation;
 import com.bookaura.systemconfig.dto.SystemConfigurationResponse;
 import com.bookaura.systemconfig.entity.SystemConfiguration;
 import com.bookaura.systemconfig.repository.SystemConfigurationRepository;
@@ -44,11 +45,13 @@ public class SystemConfigurationService {
         return maintenanceMode.get();
     }
 
+    @LogOperation
     @Transactional(readOnly = true)
     public SystemConfigurationResponse get() {
         return toResponse(findSingleton());
     }
 
+    @LogOperation
     @Transactional
     public SystemConfigurationResponse setMaintenanceMode(boolean enabled, UUID adminUserId) {
         SystemConfiguration config = findSingleton();

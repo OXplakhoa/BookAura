@@ -6,6 +6,7 @@ import com.bookaura.catalog.entity.Book;
 import com.bookaura.catalog.repository.BookRepository;
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
+import com.bookaura.common.logging.LogOperation;
 import com.bookaura.common.web.PageResponse;
 import com.bookaura.loan.dto.LoanResponse;
 import com.bookaura.loan.entity.Loan;
@@ -27,6 +28,7 @@ import java.util.UUID;
  * conditional atomic UPDATE + affected-row count. No pessimistic/optimistic lock combination.
  */
 @Service
+@LogOperation
 public class LoanService {
 
     private static final Duration DEFAULT_LOAN_PERIOD = Duration.ofDays(14);

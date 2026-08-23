@@ -9,6 +9,7 @@ import com.bookaura.auth.repository.RoleRepository;
 import com.bookaura.auth.repository.UserAccountRepository;
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
+import com.bookaura.common.logging.LogOperation;
 import com.bookaura.common.util.PhoneNormalizer;
 import com.bookaura.common.web.PageResponse;
 import com.bookaura.member.dto.*;
@@ -26,6 +27,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 @Service
+@LogOperation
 public class MemberService {
 
     private static final Logger AUDIT = LoggerFactory.getLogger("com.bookaura.audit");

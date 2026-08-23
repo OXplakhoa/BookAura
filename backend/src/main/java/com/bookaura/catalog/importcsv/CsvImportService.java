@@ -8,6 +8,7 @@ import com.bookaura.catalog.service.CatalogRelationResolver;
 import com.bookaura.catalog.validation.IsbnUtils;
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
+import com.bookaura.common.logging.LogOperation;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -26,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
+@LogOperation
 public class CsvImportService {
 
     public static final long MAX_FILE_BYTES = 5L * 1024 * 1024; // strictly below 5 MiB
