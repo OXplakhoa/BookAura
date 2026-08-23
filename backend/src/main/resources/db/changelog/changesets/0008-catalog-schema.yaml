@@ -1,0 +1,188 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0008-catalog-schema
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: authors
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: normalized_name
+                  type: varchar(120)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createTable:
+            tableName: categories
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(80)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: normalized_name
+                  type: varchar(80)
+                  constraints:
+                    nullable: false
+                    unique: true
+        - createTable:
+            tableName: books
+            columns:
+              - column:
+                  name: id
+                  type: uuid
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: isbn
+                  type: varchar(13)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: varchar(4000)
+              - column:
+                  name: publication_year
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_quantity
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: available_quantity
+                  type: integer
+                  constraints:
+                    nullable: false
+              - column:
+                  name: active
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: timestamptz
+              - column:
+                  name: created_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: book_authors
+            columns:
+              - column:
+                  name: book_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_authors_book
+                    references: books(id)
+                    deleteCascade: true
+              - column:
+                  name: author_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_authors_author
+                    references: authors(id)
+        - addPrimaryKey:
+            tableName: book_authors
+            columnNames: book_id, author_id
+            constraintName: pk_book_authors
+        - createTable:
+            tableName: book_categories
+            columns:
+              - column:
+                  name: book_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_categories_book
+                    references: books(id)
+                    deleteCascade: true
+              - column:
+                  name: category_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_categories_category
+                    references: categories(id)
+        - addPrimaryKey:
+            tableName: book_categories
+            columnNames: book_id, category_id
+            constraintName: pk_book_categories
+        - createIndex:
+            tableName: books
+            indexName: idx_books_title
+            columns:
+              - column:
+                  name: title
+        - createIndex:
+            tableName: books
+            indexName: idx_books_publication_year
+            columns:
+              - column:
+                  name: publication_year
+        - createIndex:
+            tableName: books
+            indexName: idx_books_active_available
+            columns:
+              - column:
+                  name: active
+              - column:
+                  name: available_quantity
+        - createIndex:
+            tableName: book_authors
+            indexName: idx_book_authors_author
+            columns:
+              - column:
+                  name: author_id
+        - createIndex:
+            tableName: book_categories
+            indexName: idx_book_categories_category
+            columns:
+              - column:
+                  name: category_id
+        - sql:
+            dbms: postgresql
+            sql: >-
+              ALTER TABLE books ADD CONSTRAINT ck_books_quantities
+              CHECK (total_quantity >= 0 AND available_quantity >= 0 AND available_quantity <= total_quantity)
+        - sql:
+            dbms: postgresql
+            sql: >-
+              ALTER TABLE books ADD CONSTRAINT ck_books_publication_year
+              CHECK (publication_year BETWEEN 1450 AND 2100)

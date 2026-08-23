@@ -15,3 +15,5 @@ databaseChangeLog:
       file: db/changelog/changesets/0006-otp-tokens.yaml
   - include:
       file: db/changelog/changesets/0007-seed-roles.yaml
+  - include:
+      file: db/changelog/changesets/0008-catalog-schema.yaml
