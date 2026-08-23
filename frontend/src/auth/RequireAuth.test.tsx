@@ -12,6 +12,7 @@ const baseAuth: AuthContextValue = {
   signIn: vi.fn(),
   signUp: vi.fn(),
   completeOAuth: vi.fn(),
+  completePhoneOtp: vi.fn(),
   syncUser: vi.fn(),
   signOut: vi.fn(),
 };
