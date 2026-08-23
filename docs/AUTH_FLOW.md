@@ -139,3 +139,15 @@ Wrong code hashes are constant-time compared. Each failed attempt is recorded in
 outer request deliberately throws 400 and would otherwise roll the counter back. Five failures lock the token;
 resend cooldown is 60 seconds. Confirmation rechecks the unique email immediately before flush, and duplicate
 races return 409. The existing JWT remains valid because identity is the immutable UUID `sub`, not email.
+
+## Phone OTP login (mocked delivery)
+
+- Public request response is identical for missing, disabled and active numbers; repeated active requests inside
+  60 seconds also return the generic 200 while sending only once.
+- `PHONE_LOGIN` code TTL is five minutes and reuses the same user/purpose binding, SHA-256, constant-time
+  comparison, committed five-attempt lockout and atomic single-use consumption.
+- Successful confirmation issues the normal access JWT + rotating refresh cookie; phone possession is the proof,
+  so an otherwise active account does not require prior email verification for this alternate login.
+- `FakeSmsSender` exists only in local/test, stores raw codes in process memory and never logs them. Local demo
+  retrieval is an ADMIN-authorized, local-profile-only outbox; HTTP response redaction hides `phone` and `code`.
+- Non-local/test profile uses `UnavailableSmsSender` and clearly reports that a real gateway is not configured.
