@@ -18,6 +18,8 @@ public interface UserAccountRepository extends JpaRepository<UserAccount, UUID> 
 
     boolean existsByPhone(String phone);
 
+    boolean existsByPhoneAndIdNot(String phone, UUID id);
+
     /** Roles needed to build the Authentication; fetched in one query to avoid N+1/lazy issues in the filter. */
     @EntityGraph(attributePaths = "roles")
     Optional<UserAccount> findWithRolesById(UUID id);

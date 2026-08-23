@@ -38,6 +38,11 @@ public enum ErrorCode {
     LOAN_NOT_OWNED(HttpStatus.FORBIDDEN),
     INVENTORY_INCONSISTENT(HttpStatus.CONFLICT),
 
+    // Members
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND),
+    INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST),
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST),
+
     NOT_FOUND(HttpStatus.NOT_FOUND),
 
     // Pagination / sorting

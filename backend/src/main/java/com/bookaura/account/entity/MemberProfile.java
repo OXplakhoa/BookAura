@@ -1,12 +1,15 @@
 package com.bookaura.account.entity;
 
 import com.bookaura.auth.entity.UserAccount;
+import com.bookaura.loan.entity.Loan;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -34,6 +37,10 @@ public class MemberProfile {
 
     @Column(length = 255)
     private String address;
+
+    /** Inverse side only; Loan owns the FK. No cascade because loan history must never be deleted. */
+    @OneToMany(mappedBy = "memberProfile", fetch = FetchType.LAZY)
+    private Set<Loan> loans = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
     private Instant createdAt;
