@@ -1,11 +1,14 @@
 package com.bookaura.common.security;
 
+import com.bookaura.auth.oauth.OAuthLoginFailureHandler;
+import com.bookaura.auth.oauth.OAuthLoginSuccessHandler;
 import com.bookaura.common.error.ApiError;
 import com.bookaura.systemconfig.filter.MaintenanceModeFilter;
 import com.bookaura.systemconfig.service.SystemConfigurationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +20,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -41,7 +45,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter,
                                                    CorsConfigurationSource corsConfigurationSource,
-                                                   SystemConfigurationService systemConfigurationService)
+                                                   SystemConfigurationService systemConfigurationService,
+                                                   ObjectProvider<ClientRegistrationRepository> clientRegistrations,
+                                                   OAuthLoginSuccessHandler oauthSuccessHandler,
+                                                   OAuthLoginFailureHandler oauthFailureHandler)
             throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -56,6 +63,8 @@ public class SecurityConfig {
                                 "/api/auth/resend-verification",
                                 "/api/auth/login",
                                 "/api/auth/refresh",
+                                "/api/auth/oauth/providers",
+                                "/api/auth/oauth/exchange",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
                                 "/v3/api-docs/**",
@@ -85,6 +94,14 @@ public class SecurityConfig {
                 // The skipped admin-control endpoint still continues to authoritative @PreAuthorize.
                 .addFilterAfter(new MaintenanceModeFilter(systemConfigurationService, objectMapper),
                         UsernamePasswordAuthenticationFilter.class);
+
+        // OAuth login endpoints exist only when non-blank Google credentials produced a registration bean.
+        // The API remains fully bootable and testable without demo credentials.
+        if (clientRegistrations.getIfAvailable() != null) {
+            http.oauth2Login(oauth -> oauth
+                    .successHandler(oauthSuccessHandler)
+                    .failureHandler(oauthFailureHandler));
+        }
         return http.build();
     }
 
