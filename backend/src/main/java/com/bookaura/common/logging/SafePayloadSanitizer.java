@@ -56,7 +56,8 @@ public class SafePayloadSanitizer {
         String normalized = field.replace("_", "").replace("-", "").toLowerCase(Locale.ROOT);
         return normalized.contains("password") || SENSITIVE_EXACT.contains(normalized)
                 || normalized.endsWith("secret") || normalized.endsWith("token")
-                || normalized.endsWith("code");
+                || normalized.endsWith("code") || normalized.endsWith("email")
+                || normalized.endsWith("phone");
     }
 
     private String truncate(String value) {

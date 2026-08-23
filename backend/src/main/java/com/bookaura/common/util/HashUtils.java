@@ -19,4 +19,11 @@ public final class HashUtils {
             throw new IllegalStateException("SHA-256 not available", e);
         }
     }
+
+    public static boolean constantTimeEquals(String left, String right) {
+        if (left == null || right == null) return false;
+        return MessageDigest.isEqual(
+                left.getBytes(StandardCharsets.US_ASCII),
+                right.getBytes(StandardCharsets.US_ASCII));
+    }
 }
