@@ -12,8 +12,9 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
   real borrowed-book title, strict `yyyy/MM/d`, pagination/sort validation.
 - ✅ Loan backend (P0-A #17–20): borrow/return, active/history, final-copy atomic concurrency,
   duplicate guards, USER ownership + ADMIN override, borrow/return rollback proofs.
-- ⏳ Core frontend remains part of #31; Maintenance, observability/AOP hardening and P0-B remain pending.
-- Evidence: `./mvnw verify` = **44 tests, 0 failures/errors**; frontend `npm run build` pass;
+- ✅ Maintenance backend (#21): cached flag, 503 error contract, ADMIN control + health exceptions.
+- ⏳ Core frontend remains part of #31; observability/AOP hardening and P0-B remain pending.
+- Evidence: `./mvnw verify` = **46 tests, 0 failures/errors**; frontend `npm run build` pass;
   local Liquibase upgraded existing DB through `0009-loans`; live borrow 201 + return 200 passed.
 
 ## P0-A — Must work (demo-critical)

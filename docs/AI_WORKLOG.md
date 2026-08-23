@@ -91,4 +91,16 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
   2. Targeted tests passed, but full suite reused a cached Auth Spring context after inherited JUnit `@Container` had stopped; Hikari pointed to a dead random port. Reworked `AbstractIntegrationTest` to one JVM-lifetime PostgreSQL container with `DynamicPropertySource`; full suite passed.
 - **Tests/commands executed:** member targeted first 6/7 (query failure), unchanged regression after fix **7/7**; first full suite exposed 5 stale-container errors; after test-infra fix final `./mvnw verify` **44/44 pass**; Docker remained alive.
 - **Result:** Member backend P0-A slice complete, including borrowed-book/title criterion and strict mentor date behavior.
-- **Commits:** `f03539a`, `fd81b42`, `ff02313`; docs commit and merge reported after creation.
+- **Commits:** `f03539a`, `fd81b42`, `ff02313`; docs `c7a7fc5`; merge `9fb9f70`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Maintenance Mode backend slice
+
+- **Goal:** implement operational maintenance mode without DB query per request or an admin lockout deadlock.
+- **Files:** `systemconfig/**`; SecurityFilterChain update; Liquibase `0010-system-configuration`; tests; architecture flow/requirements/decisions/README/ERD.
+- **Important review points:** DB is source of truth; `AtomicBoolean` is request cache; cache mutation runs in transaction `afterCommit`; filter is created inside SecurityFilterChain (not servlet auto-registration); skipped control path remains protected by class-level `@PreAuthorize`.
+- **Operational risk recorded:** only a currently valid ADMIN access token can turn maintenance off. Login/refresh are intentionally not whitelisted; local fallback is restart after changing the DB flag. This keeps required exceptions narrow.
+- **Tests/commands executed:** compile pass; maintenance targeted **2/2 pass**; full `./mvnw verify` **46/46 pass**; local Liquibase `0010`; live ON 200 → public catalog 503 with traceId → health 200 → OFF 200.
+- **Result:** Maintenance backend P0-A complete; frontend maintenance route/interceptor remains pending.
+- **Commits:** `1abc3a3`, `3b5e323`, `ccf5284`; docs commit and merge reported after creation.

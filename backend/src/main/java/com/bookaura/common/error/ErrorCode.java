@@ -43,6 +43,9 @@ public enum ErrorCode {
     INVALID_DATE_FORMAT(HttpStatus.BAD_REQUEST),
     INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST),
 
+    // Operations
+    MAINTENANCE_MODE(HttpStatus.SERVICE_UNAVAILABLE),
+
     NOT_FOUND(HttpStatus.NOT_FOUND),
 
     // Pagination / sorting

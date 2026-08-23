@@ -19,3 +19,5 @@ databaseChangeLog:
       file: db/changelog/changesets/0008-catalog-schema.yaml
   - include:
       file: db/changelog/changesets/0009-loans.yaml
+  - include:
+      file: db/changelog/changesets/0010-system-configuration.yaml
