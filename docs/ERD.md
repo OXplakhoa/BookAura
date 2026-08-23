@@ -1,6 +1,6 @@
 # ERD
 
-Implemented now: auth-core, catalog, and `loans` (through Liquibase `0009`). Later system-config/audit/recommendation tables remain planned.
+Implemented now: auth-core, catalog, `loans`, and singleton `system_configuration` (through Liquibase `0010`). Later audit/recommendation tables remain planned.
 
 ```mermaid
 erDiagram

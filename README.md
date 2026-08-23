@@ -61,6 +61,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
   ADMIN management under `/api/admin/loans`.
 - ADMIN members: CRUD/search under `/api/admin/members`; date range format is strict `yyyy/MM/d`;
   search includes name, email/phone, DoB, borrowed book title, status, role and verification.
+- ADMIN operations: `GET /api/admin/system-config`, `PUT /api/admin/system-config/maintenance`;
+  normal APIs return 503 while health/control remain available.
 - Multi-sort example: `?sort=publicationYear:desc,title:asc`; maximum page size is 10.
 
 CSV header is exact; author/category lists use `|`:

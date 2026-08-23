@@ -64,6 +64,27 @@ when `available_quantity < total_quantity`. No pessimistic/optimistic lock combi
 The partial unique index on `(member_profile_id, book_id) WHERE returned_at IS NULL` closes the concurrent
 same-member/same-book race; a losing transaction rolls its inventory decrement back.
 
+## Maintenance flow
+
+```mermaid
+flowchart TD
+    R[Request] --> C[CORS + JWT filters]
+    C --> M{Cached maintenance flag?}
+    M -- OFF --> A[Authorization + Controller]
+    M -- ON --> E{Path exception?}
+    E -- health --> A
+    E -- /api/admin/system-config --> S[@PreAuthorize ADMIN]
+    E -- OPTIONS --> A
+    E -- normal API --> X[503 MAINTENANCE_MODE + traceId + Retry-After]
+    S --> T[DB update in transaction]
+    T --> K[afterCommit updates AtomicBoolean cache]
+```
+
+The filter performs **zero configuration DB queries per request**. Bypassing the filter does not bypass
+security: system-control endpoints still require a currently valid ADMIN access token. For this local demo,
+an expired ADMIN token during maintenance would require the documented operational fallback (restart with
+DB flag off); widening the exception to login/refresh was rejected to keep the escape hatch narrow.
+
 ## Logging / observability
 
 Implemented: Log4j2 console + rolling file, MDC `traceId`, security/business audit logger.
