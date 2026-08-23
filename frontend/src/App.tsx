@@ -5,6 +5,7 @@ import { LoadingScreen } from "./components/LoadingScreen";
 import { AppShell } from "./layouts/AppShell";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
+import { AccountSettingsPage } from "./pages/AccountSettingsPage";
 import { BookDetailPage } from "./pages/BookDetailPage";
 import { CatalogPage } from "./pages/CatalogPage";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
@@ -50,6 +51,7 @@ export default function App() {
         <Route element={<AppShell />}>
           <Route path="app/loans" element={<LoansPage mode="active" />} />
           <Route path="app/history" element={<LoansPage mode="history" />} />
+          <Route path="app/account" element={<AccountSettingsPage />} />
           <Route element={<RequireAuth admin />}>
             <Route path="admin" element={<AdminDashboardPage />} />
             <Route path="admin/books" element={<AdminBooksPage />} />

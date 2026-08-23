@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { exchangeOAuthCode, login, logout, refreshSession, register, type LoginInput, type RegisterInput } from "./auth-api";
 import { AuthContext, type AuthContextValue } from "./auth-context";
-import { clearSession, getSession, setSession, subscribeSession } from "./session-store";
+import { clearSession, getSession, setSession, setSessionUser, subscribeSession } from "./session-store";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSnapshot] = useState(getSession);
@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(response);
       return response.user;
     },
+    syncUser: setSessionUser,
     signOut: async () => {
       try {
         if (getSession().accessToken) {

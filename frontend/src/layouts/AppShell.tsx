@@ -1,4 +1,4 @@
-import { BookOpen, History, LayoutDashboard, Library, LogOut, ShieldCheck } from "lucide-react";
+import { BookOpen, History, LayoutDashboard, Library, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/use-auth";
 import { Brand } from "../components/Brand";
@@ -7,6 +7,7 @@ const userNav = [
   { to: "/catalog", label: "Browse", icon: BookOpen },
   { to: "/app/loans", label: "Active loans", icon: Library },
   { to: "/app/history", label: "History", icon: History },
+  { to: "/app/account", label: "Account", icon: UserRound },
 ];
 
 export function AppShell() {
