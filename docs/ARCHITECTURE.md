@@ -39,6 +39,8 @@ HTTP → TraceIdFilter (MDC traceId + X-Trace-Id header)
 - Access JWT 15 min (HS256, env secret), claims: `jti`, `sub`, `roles`, `iat`, `exp`. Stored **in frontend memory only**.
 - Refresh token: opaque random, 7 days, **HttpOnly + SameSite=Lax cookie** (`path=/api/auth`), rotation + reuse detection (revoke family), only SHA-256 hash persisted.
 - Logout: revoke refresh session + insert `revoked_access_tokens(jti, expires_at)`.
+- Authenticated email change reuses purpose-bound `otp_tokens`: the latest CHANGE_EMAIL token is tied to
+  user + new-email target, wrong attempts commit independently, and correct consumption is an atomic update.
 - Google OIDC is optional: Spring validates state/nonce/signature/provider claims, then the backend redirects
   only a 60-second opaque exchange code. DB stores its SHA-256 hash; atomic consume issues the same app
   session as password login. JWT/provider tokens never enter redirect URLs. The OAuth handshake uses a

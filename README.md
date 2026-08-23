@@ -61,6 +61,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 
 - Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`;
   optional Google OIDC starts at `/oauth2/authorization/google` and exchanges at `/api/auth/oauth/exchange`.
+- Account: `POST /api/account/email-change/request` and `/confirm` implement hashed, expiring,
+  cooldown/attempt-limited, single-use verification of the new email.
 - Public catalog: `GET /api/books`, `GET /api/books/{id}`
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
 - Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
@@ -88,7 +90,8 @@ service outcome/duration without arguments or return values.
 ## Implemented frontend journeys
 
 - Public editorial landing page, URL-backed catalog filters, availability and book detail.
-- Registration, email-link verification and login; access token is memory-only, refresh cookie is HttpOnly.
+- Registration, email-link verification, login, Google OIDC and verified six-digit change-email;
+  access token is memory-only, refresh cookie is HttpOnly.
 - Member borrow, active loans, due/overdue state, confirmed return and permanent history.
 - ADMIN route-guarded workspaces: Book CRUD/archive/CSV, Member search/CRUD/disable,
   loan oversight/admin return and maintenance control.
