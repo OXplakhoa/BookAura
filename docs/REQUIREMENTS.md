@@ -24,8 +24,11 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 - ✅ Email OTP/change email P0-B (#33): authenticated new-email request, six-digit delivery,
   SHA-256, 10-minute expiry, 60-second cooldown, committed five-attempt lockout, atomic single-use
   confirmation and account settings UI.
-- ⏳ Mocked phone OTP and Facebook remain pending.
-- Evidence: `./mvnw verify` = **56 backend tests, 0 failures/errors**; frontend **23 tests**,
+- ✅ Mocked phone OTP P0-B (#34): enumeration-safe request, in-memory `FakeSmsSender`,
+  five-minute hashed code, silent cooldown, five-attempt/single-use confirmation, normal app session,
+  phone login UI and ADMIN-only local outbox with no raw OTP logs.
+- ⏳ Facebook OAuth remains pending.
+- Evidence: `./mvnw verify` = **59 backend tests, 0 failures/errors**; frontend **23 tests**,
   Oxlint and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
   Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
   maintenance 200→503→200 all passed.
@@ -58,7 +61,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
 32. ✅ Google OAuth (Spring Security OAuth2 Client; backend callback → one-time code → session; no tokens in URL)
 33. ✅ Email OTP / change email (code to new email, change only after verify)
-34. Phone OTP with mocked `SmsSender` (full OTP lifecycle: hash, expiry, cooldown, attempt limit, one-time, purpose, audit)
+34. ✅ Phone OTP with mocked `SmsSender` (full OTP lifecycle: hash, expiry, cooldown, attempt limit, one-time, purpose, audit)
 35. Facebook OAuth (same architecture; document and skip if it becomes a time sink)
 
 ## P2 — Wow features (cut from bottom upward under time pressure)

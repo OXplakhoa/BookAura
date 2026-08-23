@@ -65,6 +65,8 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/api/auth/oauth/providers",
                                 "/api/auth/oauth/exchange",
+                                "/api/auth/phone-otp/request",
+                                "/api/auth/phone-otp/confirm",
                                 "/oauth2/**",
                                 "/login/oauth2/**",
                                 "/v3/api-docs/**",

@@ -166,6 +166,20 @@ public class AuthService {
     }
 
     @Transactional
+    public LoginResult loginFromPhoneOtp(UUID userId, HttpServletRequest http) {
+        UserAccount user = userRepository.findWithRolesById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS, "Account not found"));
+        if (user.getStatus() == AccountStatus.DISABLED) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED, "Account is disabled");
+        }
+        JwtService.IssuedToken access = jwtService.createAccessToken(user);
+        RefreshTokenService.IssuedSession refresh = refreshTokenService.issue(user, http.getRemoteAddr(),
+                http.getHeader("User-Agent"));
+        AUDIT.info("event=PHONE_OTP_LOGIN_SUCCESS userId={}", user.getId());
+        return new LoginResult(access, refresh.rawToken(), refresh.expiresAt(), toSummary(user));
+    }
+
+    @Transactional
     public LoginResult refresh(String rawRefreshToken, HttpServletRequest http) {
         if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
             throw new BusinessException(ErrorCode.REFRESH_MISSING, "Refresh cookie is missing");

@@ -152,4 +152,13 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Problems found/corrections:** recognized that incrementing attempts in the rejected outer transaction would silently roll back (same class of bug as refresh reuse); isolated recorder transaction and proved count=5. Removed `clearAutomatically` from OTP bulk updates because it would detach the loaded user before summary mapping. Targeted test logs exposed raw `newEmail` because redaction matched exact `email`; extended sanitizer to email/phone suffixes and confirmed `[REDACTED]` in final logs.
 - **Tests/commands executed:** targeted email change **3/3 pass**; final backend `verify` **56/56 pass**; frontend **23/23 pass**, lint/build pass. Tests cover unchanged-before-confirm, delivered code success, replay, five wrong attempts persisted, correct-after-lockout rejection, resend cooldown and duplicate email. Live through Vite + Mailpit: ADMIN-created verified member → USER login → request 200 → six-digit SMTP capture → confirm 200 → `/me` returned changed email → cleanup disable 204.
 - **Result:** Email OTP/change-email P0-B complete; next item is mocked phone OTP.
-- **Commits:** `0eee857`, `328c369`, `77302de`, `348d4c8`, `2d72c0d`; docs commit/merge reported after creation.
+- **Commits:** `0eee857`, `328c369`, `77302de`, `348d4c8`, `2d72c0d`; docs `78b802f`; merge `0126a79`.
+
+---
+
+## 2026-08-23 — Session 2 (cont.): Mocked phone OTP login
+
+- **Goal/result:** complete P0-B phone OTP without violating no-OTP-log policy. Active registered phones receive a five-minute `PHONE_LOGIN` code through local/test in-memory `FakeSmsSender`; request is enumeration-safe and cooldown-silent; confirmation reuses hashed five-attempt/atomic single-use OTP rules and issues the normal session. Local code retrieval is ADMIN-only; production clearly has no real gateway.
+- **Tests/evidence:** targeted phone **3/3 pass**; final backend `verify` **59/59 pass**; frontend **23/23**, lint/build pass. Live Vite flow: request 200, anonymous outbox 401, ADMIN outbox 200, six-digit login USER, replay 400, cleanup disable 204; exact raw code absent from backend log.
+- **Correction:** first new component test used an unreliable React Hook Form/user-event timing path and was not committed; production flow had already passed live, frontend's stable suite remained green. No failing test was hidden in reported counts.
+- **Commits:** `c01358a`, `ae366b5`, `2100684`, `d8e5aec`; docs commit/merge reported after creation.

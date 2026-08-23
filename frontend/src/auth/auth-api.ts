@@ -42,6 +42,14 @@ export function googleAuthorizationUrl(): string {
   return `${baseUrl}/oauth2/authorization/google`;
 }
 
+export async function requestPhoneOtp(phone: string): Promise<MessageResponse> {
+  return (await api.post<MessageResponse>("/auth/phone-otp/request", { phone })).data;
+}
+
+export async function confirmPhoneOtp(phone: string, code: string): Promise<AuthResponse> {
+  return (await api.post<AuthResponse>("/auth/phone-otp/confirm", { phone, code })).data;
+}
+
 export async function currentUser(): Promise<UserSummary> {
   return (await api.get<UserSummary>("/auth/me")).data;
 }
