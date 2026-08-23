@@ -4,6 +4,7 @@ import com.bookaura.auth.dto.*;
 import com.bookaura.auth.oauth.OAuthLoginService;
 import com.bookaura.auth.oauth.OAuthProviderAvailability;
 import com.bookaura.auth.service.AuthService;
+import com.bookaura.auth.sms.PhoneOtpService;
 import com.bookaura.auth.token.RefreshCookieService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,13 +30,16 @@ public class AuthController {
     private final RefreshCookieService cookieService;
     private final OAuthLoginService oauthLoginService;
     private final OAuthProviderAvailability oauthProviders;
+    private final PhoneOtpService phoneOtpService;
 
     public AuthController(AuthService authService, RefreshCookieService cookieService,
-                          OAuthLoginService oauthLoginService, OAuthProviderAvailability oauthProviders) {
+                          OAuthLoginService oauthLoginService, OAuthProviderAvailability oauthProviders,
+                          PhoneOtpService phoneOtpService) {
         this.authService = authService;
         this.cookieService = cookieService;
         this.oauthLoginService = oauthLoginService;
         this.oauthProviders = oauthProviders;
+        this.phoneOtpService = phoneOtpService;
     }
 
     @Operation(summary = "Register with email + password; sends verification email")
@@ -78,6 +82,20 @@ public class AuthController {
     public AuthResponse exchangeOAuth(@Valid @RequestBody OAuthExchangeRequest request,
                                       HttpServletRequest http, HttpServletResponse response) {
         return toAuthResponse(oauthLoginService.exchange(request.code(), http), response);
+    }
+
+    @Operation(summary = "Request an enumeration-safe five-minute phone login code")
+    @PostMapping("/phone-otp/request")
+    public MessageResponse requestPhoneOtp(@Valid @RequestBody PhoneOtpRequest request) {
+        phoneOtpService.request(request.phone());
+        return new MessageResponse("If an active account uses this phone, a code was sent. Please wait before retrying.");
+    }
+
+    @Operation(summary = "Consume a phone login code and issue the normal app session")
+    @PostMapping("/phone-otp/confirm")
+    public AuthResponse confirmPhoneOtp(@Valid @RequestBody PhoneOtpConfirmRequest request,
+                                        HttpServletRequest http, HttpServletResponse response) {
+        return toAuthResponse(phoneOtpService.confirm(request.phone(), request.code(), http), response);
     }
 
     @Operation(summary = "Rotate refresh token (HttpOnly cookie) -> new access token + new cookie")
