@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0010-system-configuration
+      author: bookaura
+      changes:
+        - createTable:
+            tableName: system_configuration
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: maintenance_mode
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamptz
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_by
+                  type: uuid
+                  constraints:
+                    foreignKeyName: fk_system_config_updated_by
+                    references: user_accounts(id)
+        - insert:
+            tableName: system_configuration
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+              - column:
+                  name: maintenance_mode
+                  valueBoolean: false
+              - column:
+                  name: updated_at
+                  valueComputed: CURRENT_TIMESTAMP
+        - sql:
+            dbms: postgresql
+            sql: >-
+              ALTER TABLE system_configuration ADD CONSTRAINT ck_system_config_singleton
+              CHECK (id = 1)
