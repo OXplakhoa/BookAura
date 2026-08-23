@@ -21,6 +21,7 @@
         <java.version>17</java.version>
         <jjwt.version>0.12.7</jjwt.version>
         <springdoc.version>2.8.17</springdoc.version>
+        <commons-csv.version>1.14.1</commons-csv.version>
     </properties>
 
     <dependencies>
@@ -95,6 +96,13 @@
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Streaming CSV import -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>${commons-csv.version}</version>
         </dependency>
 
         <!-- JWT -->

@@ -3,14 +3,18 @@ package com.bookaura.catalog.controller;
 import com.bookaura.catalog.dto.BookRequest;
 import com.bookaura.catalog.dto.BookResponse;
 import com.bookaura.catalog.dto.BookSearchCriteria;
+import com.bookaura.catalog.importcsv.CsvImportResult;
+import com.bookaura.catalog.importcsv.CsvImportService;
 import com.bookaura.catalog.service.BookService;
 import com.bookaura.common.web.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 
@@ -21,9 +25,11 @@ import java.util.UUID;
 public class AdminBookController {
 
     private final BookService bookService;
+    private final CsvImportService csvImportService;
 
-    public AdminBookController(BookService bookService) {
+    public AdminBookController(BookService bookService, CsvImportService csvImportService) {
         this.bookService = bookService;
+        this.csvImportService = csvImportService;
     }
 
     @Operation(summary = "Create a book (ADMIN)")
@@ -50,6 +56,15 @@ public class AdminBookController {
     @GetMapping("/{id}")
     public BookResponse detail(@PathVariable UUID id) {
         return bookService.getAdmin(id);
+    }
+
+    @Operation(summary = "Import books from CSV (ADMIN)",
+            description = "Multipart .csv strictly below 5 MiB. Exact header: " +
+                    "title,isbn,authors,categories,publicationYear,totalQuantity,description. " +
+                    "Authors/categories use | separator. All-or-nothing transaction with row-level errors.")
+    @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CsvImportResult importCsv(@RequestPart("file") MultipartFile file) {
+        return csvImportService.importBooks(file);
     }
 
     @Operation(summary = "Search books including active-status filter (ADMIN)",
