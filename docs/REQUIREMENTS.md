@@ -15,9 +15,14 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 - ✅ Maintenance backend (#21): cached flag, 503 error contract, ADMIN control + health exceptions.
 - ✅ Observability baseline (#25–28): Log4j2 rolling file/console, traceId, bounded redacted HTTP logs,
   audit events and annotation-driven AOP outcome/duration logs.
-- ⏳ Core frontend remains part of #31; P0-B extended auth remains pending.
-- Evidence: `./mvnw verify` = **50 tests, 0 failures/errors**; frontend `npm run build` pass;
-  local Liquibase upgraded existing DB through `0009-loans`; live borrow 201 + return 200 passed.
+- ✅ Core React frontend (#31): auth/session restoration, URL-backed public catalog/detail,
+  member borrow/active/return/history, ADMIN Book/CSV/Member/Loan/Maintenance workspaces,
+  responsive/a11y states and route splitting.
+- ⏳ P0-B extended auth remains pending.
+- Evidence: `./mvnw verify` = **50 backend tests, 0 failures/errors**; frontend **20 tests**,
+  Oxlint and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
+  Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
+  maintenance 200→503→200 all passed.
 
 ## P0-A — Must work (demo-critical)
 
