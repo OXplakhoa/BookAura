@@ -75,7 +75,7 @@ export function LoginPage() {
           {isSubmitting && <LoaderCircle className="animate-spin motion-reduce:animate-none" size={18} />}{isSubmitting ? "Signing in…" : "Sign in"}
         </button>
       </form>
-      <p className="mt-7 text-center text-sm text-muted">New to BookAura? <Link to="/register" className="font-semibold text-primary underline-offset-4 hover:underline">Create your account</Link></p>
+      <div className="mt-6 flex flex-col items-center gap-3 text-sm"><Link to="/phone-login" className="font-semibold text-primary underline-offset-4 hover:underline">Sign in with a phone code instead</Link><p className="text-muted">New to BookAura? <Link to="/register" className="font-semibold text-primary underline-offset-4 hover:underline">Create your account</Link></p></div>
     </div>
   );
 }

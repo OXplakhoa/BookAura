@@ -6,6 +6,7 @@ const sections = [
   { to: "/admin/members", icon: Users, title: "Members", text: "Search profiles, onboard members and disable accounts safely." },
   { to: "/admin/loans", icon: Library, title: "Loans", text: "Review current activity and return a loan on a member's behalf." },
   { to: "/admin/maintenance", icon: Settings2, title: "Operations", text: "Control maintenance mode without locking out health checks." },
+  ...(import.meta.env.DEV ? [{ to: "/admin/sms-outbox", icon: Settings2, title: "Fake SMS outbox", text: "Read local in-memory phone OTPs without writing secrets to logs." }] : []),
 ];
 
 export function AdminDashboardPage() {

@@ -15,7 +15,7 @@ interface RetryableRequest extends InternalAxiosRequestConfig {
 let refreshPromise: Promise<AuthResponse> | null = null;
 
 function isAuthLifecycleRequest(url?: string): boolean {
-  return Boolean(url && ["/auth/login", "/auth/register", "/auth/refresh", "/auth/verify-email", "/auth/oauth/exchange"].some(
+  return Boolean(url && ["/auth/login", "/auth/register", "/auth/refresh", "/auth/verify-email", "/auth/oauth/exchange", "/auth/phone-otp/request", "/auth/phone-otp/confirm"].some(
     (path) => url.startsWith(path),
   ));
 }

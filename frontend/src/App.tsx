@@ -15,6 +15,7 @@ import { LoansPage } from "./pages/LoansPage";
 import { MaintenancePage } from "./pages/MaintenancePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { OAuthCallbackPage } from "./pages/OAuthCallbackPage";
+import { PhoneLoginPage } from "./pages/PhoneLoginPage";
 
 const AdminBooksPage = lazy(() => import("./pages/admin/AdminBooksPage").then((module) => ({ default: module.AdminBooksPage })));
 const AdminDashboardPage = lazy(() => import("./pages/admin/AdminDashboardPage").then((module) => ({ default: module.AdminDashboardPage })));
@@ -23,6 +24,7 @@ const AdminMembersPage = lazy(() => import("./pages/admin/AdminMembersPage").the
 const BookFormPage = lazy(() => import("./pages/admin/BookFormPage").then((module) => ({ default: module.BookFormPage })));
 const MaintenanceControlPage = lazy(() => import("./pages/admin/MaintenanceControlPage").then((module) => ({ default: module.MaintenanceControlPage })));
 const MemberFormPage = lazy(() => import("./pages/admin/MemberFormPage").then((module) => ({ default: module.MemberFormPage })));
+const SmsOutboxPage = lazy(() => import("./pages/admin/SmsOutboxPage").then((module) => ({ default: module.SmsOutboxPage })));
 import { RegisterPage } from "./pages/RegisterPage";
 import { VerifyEmailPage } from "./pages/VerifyEmailPage";
 import { useSystemStatus } from "./system/use-system-status";
@@ -45,6 +47,7 @@ export default function App() {
         <Route path="register" element={<RegisterPage />} />
         <Route path="verify-email" element={<VerifyEmailPage />} />
         <Route path="oauth/callback" element={<OAuthCallbackPage />} />
+        <Route path="phone-login" element={<PhoneLoginPage />} />
       </Route>
 
       <Route element={<RequireAuth />}>
@@ -62,6 +65,7 @@ export default function App() {
             <Route path="admin/members/:memberId/edit" element={<MemberFormPage />} />
             <Route path="admin/loans" element={<AdminLoansPage />} />
             <Route path="admin/maintenance" element={<MaintenanceControlPage />} />
+            <Route path="admin/sms-outbox" element={<SmsOutboxPage />} />
           </Route>
         </Route>
       </Route>

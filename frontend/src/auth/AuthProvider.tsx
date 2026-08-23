@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { exchangeOAuthCode, login, logout, refreshSession, register, type LoginInput, type RegisterInput } from "./auth-api";
+import { confirmPhoneOtp, exchangeOAuthCode, login, logout, refreshSession, register, type LoginInput, type RegisterInput } from "./auth-api";
 import { AuthContext, type AuthContextValue } from "./auth-context";
 import { clearSession, getSession, setSession, setSessionUser, subscribeSession } from "./session-store";
 
@@ -28,6 +28,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp: async (input: RegisterInput) => (await register(input)).message,
     completeOAuth: async (code: string) => {
       const response = await exchangeOAuthCode(code);
+      setSession(response);
+      return response.user;
+    },
+    completePhoneOtp: async (phone: string, code: string) => {
+      const response = await confirmPhoneOtp(phone, code);
       setSession(response);
       return response.user;
     },
