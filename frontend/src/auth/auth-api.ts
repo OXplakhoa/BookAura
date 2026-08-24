@@ -29,17 +29,29 @@ export async function resendVerification(email: string): Promise<MessageResponse
   return (await api.post<MessageResponse>("/auth/resend-verification", { email })).data;
 }
 
-export async function getOAuthProviders(): Promise<{ google: boolean }> {
-  return (await api.get<{ google: boolean }>("/auth/oauth/providers")).data;
+export interface OAuthProviders {
+  google: boolean;
+  facebook: boolean;
+}
+
+export async function getOAuthProviders(): Promise<OAuthProviders> {
+  return (await api.get<OAuthProviders>("/auth/oauth/providers")).data;
 }
 
 export async function exchangeOAuthCode(code: string): Promise<AuthResponse> {
   return (await api.post<AuthResponse>("/auth/oauth/exchange", { code })).data;
 }
 
+function oauthBaseUrl(): string {
+  return import.meta.env.VITE_OAUTH_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:8080" : "");
+}
+
 export function googleAuthorizationUrl(): string {
-  const baseUrl = import.meta.env.VITE_OAUTH_BASE_URL ?? (import.meta.env.DEV ? "http://localhost:8080" : "");
-  return `${baseUrl}/oauth2/authorization/google`;
+  return `${oauthBaseUrl()}/oauth2/authorization/google`;
+}
+
+export function facebookAuthorizationUrl(): string {
+  return `${oauthBaseUrl()}/oauth2/authorization/facebook`;
 }
 
 export async function requestPhoneOtp(phone: string): Promise<MessageResponse> {

@@ -56,10 +56,28 @@ public class OAuthLoginService {
     @Transactional
     public String beginGoogleLogin(GoogleClaims claims) {
         validateClaims(claims);
+        return beginLogin(OAuthProvider.GOOGLE, claims.subject(), claims.email(), claims.fullName());
+    }
+
+    /**
+     * Called after Spring Security completes the Facebook authorization-code exchange and loads
+     * Graph API {@code /me}. Facebook has no email_verified claim; Graph API emails are treated as
+     * verified (D29). Email may be entirely absent (denied permission / phone-signed-up account).
+     */
+    @Transactional
+    public String beginFacebookLogin(FacebookClaims claims) {
+        if (!StringUtils.hasText(claims.subject()) || !StringUtils.hasText(claims.email())) {
+            throw new BusinessException(ErrorCode.OAUTH_EMAIL_NOT_VERIFIED,
+                    "Facebook did not provide an email address");
+        }
+        return beginLogin(OAuthProvider.FACEBOOK, claims.subject(), claims.email(), claims.fullName());
+    }
+
+    private String beginLogin(OAuthProvider provider, String subject, String email, String fullName) {
         UserAccount user = identityRepository
-                .findByProviderAndProviderSubject(OAuthProvider.GOOGLE, claims.subject())
+                .findByProviderAndProviderSubject(provider, subject)
                 .map(OAuthIdentity::getUserAccount)
-                .orElseGet(() -> linkOrCreateGoogleIdentity(claims));
+                .orElseGet(() -> linkOrCreateIdentity(provider, subject, email, fullName));
         requireActive(user);
 
         String rawCode = TokenGenerator.urlSafeToken();
@@ -68,7 +86,7 @@ public class OAuthLoginService {
         code.setUserAccount(user);
         code.setExpiresAt(Instant.now().plus(EXCHANGE_TTL));
         codeRepository.save(code);
-        AUDIT.info("event=OAUTH_CALLBACK_SUCCESS provider=GOOGLE userId={}", user.getId());
+        AUDIT.info("event=OAUTH_CALLBACK_SUCCESS provider={} userId={}", provider, user.getId());
         return rawCode;
     }
 
@@ -87,24 +105,25 @@ public class OAuthLoginService {
         return authService.loginFromOAuthExchange(code.getUserAccount().getId(), request);
     }
 
-    private UserAccount linkOrCreateGoogleIdentity(GoogleClaims claims) {
-        String email = claims.email().trim().toLowerCase(Locale.ROOT);
-        UserAccount user = userRepository.findByEmail(email).orElseGet(() -> createUser(claims, email));
+    private UserAccount linkOrCreateIdentity(OAuthProvider provider, String subject, String rawEmail, String fullName) {
+        String email = rawEmail.trim().toLowerCase(Locale.ROOT);
+        UserAccount user = userRepository.findByEmail(email)
+                .orElseGet(() -> createUser(email, fullName));
         requireActive(user);
         if (user.getEmailVerifiedAt() == null) {
             user.setEmailVerifiedAt(Instant.now());
         }
 
         OAuthIdentity identity = new OAuthIdentity();
-        identity.setProvider(OAuthProvider.GOOGLE);
-        identity.setProviderSubject(claims.subject());
+        identity.setProvider(provider);
+        identity.setProviderSubject(subject);
         identity.setUserAccount(user);
         identityRepository.save(identity);
-        AUDIT.info("event=OAUTH_IDENTITY_LINKED provider=GOOGLE userId={}", user.getId());
+        AUDIT.info("event=OAUTH_IDENTITY_LINKED provider={} userId={}", provider, user.getId());
         return user;
     }
 
-    private UserAccount createUser(GoogleClaims claims, String email) {
+    private UserAccount createUser(String email, String fullName) {
         Role userRole = roleRepository.findByName(Role.USER)
                 .orElseThrow(() -> new IllegalStateException("Role USER not seeded"));
         UserAccount user = new UserAccount();
@@ -117,7 +136,7 @@ public class OAuthLoginService {
 
         MemberProfile profile = new MemberProfile();
         profile.setUserAccount(user);
-        profile.setFullName(StringUtils.hasText(claims.fullName()) ? claims.fullName().trim() : email);
+        profile.setFullName(StringUtils.hasText(fullName) ? fullName.trim() : email);
         user.setProfile(profile);
         return userRepository.save(user);
     }
@@ -141,5 +160,8 @@ public class OAuthLoginService {
     }
 
     public record GoogleClaims(String subject, String email, boolean emailVerified, String fullName) {
+    }
+
+    public record FacebookClaims(String subject, String email, String fullName) {
     }
 }
