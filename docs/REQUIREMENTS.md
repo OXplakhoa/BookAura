@@ -62,7 +62,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 32. ✅ Google OAuth (Spring Security OAuth2 Client; backend callback → one-time code → session; no tokens in URL)
 33. ✅ Email OTP / change email (code to new email, change only after verify)
 34. ✅ Phone OTP with mocked `SmsSender` (full OTP lifecycle: hash, expiry, cooldown, attempt limit, one-time, purpose, audit)
-35. Facebook OAuth (same architecture; document and skip if it becomes a time sink)
+35. ~~Facebook OAuth (same architecture; document and skip if it becomes a time sink)~~ ✅ done 2026-08-24 (D29: OAuth2 + Graph `/me`, credential-conditional)
 
 ## P2 — Wow features (cut from bottom upward under time pressure)
 

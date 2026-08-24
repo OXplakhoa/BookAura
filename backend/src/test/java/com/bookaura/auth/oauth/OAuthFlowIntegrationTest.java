@@ -86,7 +86,64 @@ class OAuthFlowIntegrationTest extends AbstractIntegrationTest {
 
         mockMvc.perform(get("/api/auth/oauth/providers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.google").value(false));
+                .andExpect(jsonPath("$.google").value(false))
+                .andExpect(jsonPath("$.facebook").value(false));
+    }
+
+    @Test
+    void facebookCallbackCreatesVerifiedUser_andExchangeCodeIsSingleUse() throws Exception {
+        String suffix = UUID.randomUUID().toString();
+        String email = "facebook-" + suffix + "@oauth.test";
+        String rawCode = oauthLoginService.beginFacebookLogin(
+                new OAuthLoginService.FacebookClaims("fb-sub-" + suffix, email, "Facebook Reader"));
+
+        mockMvc.perform(post("/api/auth/oauth/exchange")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(java.util.Map.of("code", rawCode))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").isNotEmpty())
+                .andExpect(jsonPath("$.user.email").value(email))
+                .andExpect(jsonPath("$.user.fullName").value("Facebook Reader"))
+                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("HttpOnly")));
+
+        mockMvc.perform(post("/api/auth/oauth/exchange")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(java.util.Map.of("code", rawCode))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("OAUTH_EXCHANGE_INVALID"));
+
+        UserAccount user = userRepository.findByEmail(email).orElseThrow();
+        assertThat(user.getEmailVerifiedAt()).isNotNull();
+        assertThat(identityRepository.findByProviderAndProviderSubject(
+                OAuthProvider.FACEBOOK, "fb-sub-" + suffix)).isPresent();
+    }
+
+    @Test
+    void facebookCallbackLinksExistingEmailAccount_withoutCreatingDuplicate() {
+        String suffix = UUID.randomUUID().toString();
+        String email = "existing-fb-" + suffix + "@oauth.test";
+        UserAccount existing = createUnverifiedUser(email);
+
+        oauthLoginService.beginFacebookLogin(
+                new OAuthLoginService.FacebookClaims("fb-linked-" + suffix, email, "Provider Name"));
+
+        UserAccount linked = userRepository.findByEmail(email).orElseThrow();
+        OAuthIdentity identity = identityRepository.findByProviderAndProviderSubject(
+                OAuthProvider.FACEBOOK, "fb-linked-" + suffix).orElseThrow();
+        assertThat(linked.getId()).isEqualTo(existing.getId());
+        assertThat(linked.getEmailVerifiedAt()).isNotNull();
+        assertThat(identity.getUserAccount().getId()).isEqualTo(existing.getId());
+    }
+
+    @Test
+    void facebookCallbackWithoutEmailIsRejected() {
+        // User denied the email permission or signed up to Facebook with a phone number.
+        assertThatThrownBy(() -> oauthLoginService.beginFacebookLogin(
+                new OAuthLoginService.FacebookClaims("fb-sub-noemail", null, "No Email Reader")))
+                .isInstanceOfSatisfying(BusinessException.class,
+                        exception -> assertThat(exception.code()).isEqualTo(ErrorCode.OAUTH_EMAIL_NOT_VERIFIED));
+        assertThat(identityRepository.findByProviderAndProviderSubject(
+                OAuthProvider.FACEBOOK, "fb-sub-noemail")).isEmpty();
     }
 
     private UserAccount createUnverifiedUser(String email) {

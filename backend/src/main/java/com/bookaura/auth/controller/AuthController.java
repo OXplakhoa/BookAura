@@ -74,7 +74,7 @@ public class AuthController {
     @Operation(summary = "List configured OAuth providers without exposing client credentials")
     @GetMapping("/oauth/providers")
     public OAuthProvidersResponse oauthProviders() {
-        return new OAuthProvidersResponse(oauthProviders.isGoogleConfigured());
+        return new OAuthProvidersResponse(oauthProviders.isGoogleConfigured(), oauthProviders.isFacebookConfigured());
     }
 
     @Operation(summary = "Exchange a 60-second single-use OAuth redirect code for the normal app session")

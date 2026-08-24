@@ -162,3 +162,18 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Tests/evidence:** targeted phone **3/3 pass**; final backend `verify` **59/59 pass**; frontend **23/23**, lint/build pass. Live Vite flow: request 200, anonymous outbox 401, ADMIN outbox 200, six-digit login USER, replay 400, cleanup disable 204; exact raw code absent from backend log.
 - **Correction:** first new component test used an unreliable React Hook Form/user-event timing path and was not committed; production flow had already passed live, frontend's stable suite remained green. No failing test was hidden in reported counts.
 - **Commits:** `c01358a`, `ae366b5`, `2100684`, `d8e5aec`; docs commit/merge reported after creation.
+
+---
+
+## 2026-08-24 — Session 3: Facebook OAuth P0-B (last extended-auth item)
+
+- **Goal:** add Facebook login mirroring the Google one-time-code architecture, adapted for Facebook's non-OIDC model.
+- **Prompt summary:** "Move on to next task (#5 Facebook OAuth) after Brevo/Google credentials were wired and live-verified."
+- **Files:** `auth/oauth/**` (provider enum, conditional client config generalized, success handler dispatch, login service generalized), `OAuthProvidersResponse`, `AuthController`, `application.yml`, frontend `auth-api.ts` + `LoginPage.tsx`; tests in `OAuthFlowIntegrationTest`.
+- **Review points:** Facebook is OAuth2+Graph `/me` (no id_token, no `email_verified`) — pinned Graph `v21.0` URLs instead of Spring's ancient v2.8 defaults; Graph email treated as verified (D29); missing email rejected; registration is credential-conditional so local/test boots unchanged.
+- **Problems found (by running, not reading):**
+  1. First full `verify` failed with an ECJ "Unresolved compilation problem" in `JwtServiceTest` — stale IDE-compiled class in `target/` (VS Code JDT); fixed by `clean`. Not a code bug.
+  2. Real javac then caught two genuine handler mistakes the quick `-q compile` had masked incrementally: `OAuth2User` does not extend `java.security.Principal` (param retyped), and a then-redundant `instanceof` pattern (removed). Fixed and re-verified from clean.
+- **Commands/tests executed:** targeted OAuth **6/6 pass** (3 Google + 3 new Facebook); final `./mvnw clean verify` **62/62 pass**; frontend **23/23 pass**, oxlint pass, Vite build pass. Live with dummy Facebook credentials: providers `{google:true, facebook:true}`; authorization endpoint 302 → `facebook.com/v21.0/dialog/oauth` with `email,public_profile` scope, state, callback URI; transient HttpOnly handshake cookie set. Real Meta consent not claimed — awaiting app credentials.
+- **Result:** P0-B now 4/4 complete. All 35 core+bonus auth requirements done.
+- **Commits:** feature commit on `feat/facebook-oauth`; docs commit/merge reported after creation.

@@ -60,7 +60,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 ## Implemented API slices
 
 - Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`;
-  optional Google OIDC starts at `/oauth2/authorization/google` and exchanges at `/api/auth/oauth/exchange`.
+  optional Google OIDC starts at `/oauth2/authorization/google`, Facebook OAuth2 at `/oauth2/authorization/facebook`;
+  both exchange at `/api/auth/oauth/exchange`.
 - Phone OTP: `/api/auth/phone-otp/request` and `/confirm`; local fake SMS stays in memory and its
   latest code is visible only to ADMIN at `/api/admin/dev/sms-outbox/latest`.
 - Account: `POST /api/account/email-change/request` and `/confirm` implement hashed, expiring,
@@ -103,7 +104,8 @@ service outcome/duration without arguments or return values.
 
 See `.env.example`. Real secrets go in a local `.env` file — **never committed**
 (`.gitignore` enforces this). Demo email uses Brevo SMTP. Google OAuth is enabled only when both `GOOGLE_CLIENT_ID` and
-`GOOGLE_CLIENT_SECRET` are non-blank; local callback: `http://localhost:8080/login/oauth2/code/google`.
+`GOOGLE_CLIENT_SECRET` are non-blank; Facebook likewise via `FACEBOOK_CLIENT_ID`/`FACEBOOK_CLIENT_SECRET`.
+local callbacks: `http://localhost:8080/login/oauth2/code/google` and `.../facebook`.
 
 ## Docs
 
