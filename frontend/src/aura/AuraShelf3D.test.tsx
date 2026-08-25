@@ -41,8 +41,16 @@ describe("AuraShelf3D", () => {
     );
 
     expect(screen.getByRole("region", { name: "3D Shelf Aura" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Open aura pick 1: The Hobbit\. Score 8/i })).toBeInTheDocument();
+    const firstLink = screen.getByRole("link", { name: /Open aura pick 1: The Hobbit\. Score 8/i });
+    expect(firstLink).toHaveAttribute("aria-describedby", "aura-preview-book-1");
     expect(screen.getByRole("link", { name: /Open aura pick 4: Dune\. Score 5/i })).toBeInTheDocument();
+
+    const preview = document.getElementById("aura-preview-book-1");
+    expect(preview).toHaveAttribute("role", "tooltip");
+    expect(preview).toHaveTextContent("A BookAura author");
+    expect(preview).toHaveTextContent("8 aura score");
+    expect(preview).toHaveTextContent("thoughtful");
+    expect(preview).toHaveTextContent("A matching mood");
 
     await user.click(screen.getByRole("link", { name: /Open aura pick 1: The Hobbit/i }));
     expect(screen.getByText("Book detail destination")).toBeInTheDocument();

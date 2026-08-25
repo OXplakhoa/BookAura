@@ -64,7 +64,7 @@
   .aura-shelf-stage {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
+    overflow: visible;
     margin-top: 1.75rem;
     border: 1px solid #d9d2c4;
     background: #e8e0d2;
@@ -168,7 +168,7 @@
   .aura-book-link {
     position: relative;
     display: block;
-    width: min(var(--book-width), 100%);
+    width: clamp(4.25rem, var(--book-width), 7.25rem);
     height: var(--book-height);
     border: 0;
     color: var(--book-ink);
@@ -178,7 +178,8 @@
   }
 
   .aura-book-link:hover,
-  .aura-book-link:focus-visible {
+  .aura-book-link:focus-visible,
+  .aura-book-link:focus-within {
     z-index: 5;
     filter: brightness(1.08);
     transform: translate3d(0, -0.9rem, 3.2rem) rotateY(var(--book-tilt));
@@ -220,24 +221,33 @@
     transform-origin: bottom center;
   }
 
-  .aura-book-spine {
+  .aura-book-cover {
     position: absolute;
     inset: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: hidden;
-    border: 1px solid rgb(255 253 248 / 0.42);
+    border: 1px solid rgb(255 253 248 / 0.48);
     background: var(--book-color);
-    box-shadow: inset 0.45rem 0 rgb(255 253 248 / 0.08), inset -0.45rem 0 rgb(25 37 54 / 0.12), 0 0.4rem 0.7rem rgb(25 37 54 / 0.22);
+    box-shadow: inset 0.45rem 0 rgb(255 253 248 / 0.1), inset -0.45rem 0 rgb(25 37 54 / 0.15), 0 0.4rem 0.7rem rgb(25 37 54 / 0.22);
     backface-visibility: hidden;
   }
 
+  .aura-book-cover-frame {
+    position: absolute;
+    inset: 0.45rem;
+    z-index: 1;
+    border: 1px solid rgb(255 253 248 / 0.38);
+    pointer-events: none;
+  }
+
   .aura-book-crest {
+    z-index: 2;
     display: grid;
     width: 1.15rem;
     height: 1.15rem;
-    margin-top: 0.7rem;
+    margin-top: 0.8rem;
     place-items: center;
     border: 1px solid var(--book-accent);
     color: var(--book-accent);
@@ -246,8 +256,11 @@
   }
 
   .aura-book-title {
-    max-height: 67%;
-    margin-top: 0.8rem;
+    z-index: 2;
+    display: -webkit-box;
+    max-width: calc(100% - 1rem);
+    max-height: 46%;
+    margin: 1.25rem 0.5rem 0;
     overflow: hidden;
     font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
     font-size: clamp(0.68rem, 1.25vw, 0.92rem);
@@ -255,23 +268,29 @@
     line-height: 1.15;
     text-align: center;
     text-overflow: ellipsis;
-    writing-mode: vertical-rl;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
   }
 
   .aura-book-author {
-    max-height: 38%;
-    margin-top: auto;
-    margin-bottom: 1.9rem;
+    z-index: 2;
+    display: -webkit-box;
+    max-width: calc(100% - 1rem);
+    max-height: 27%;
+    margin: auto 0.5rem 1.9rem;
     overflow: hidden;
-    color: rgb(255 253 248 / 0.75);
+    color: rgb(255 253 248 / 0.78);
     font-size: clamp(0.48rem, 0.85vw, 0.62rem);
-    letter-spacing: 0.04em;
+    line-height: 1.25;
+    text-align: center;
     text-overflow: ellipsis;
-    writing-mode: vertical-rl;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 
   .aura-book-rank,
   .aura-book-score {
+    z-index: 2;
     position: absolute;
     bottom: 0.55rem;
     font-size: 0.58rem;
@@ -281,6 +300,127 @@
 
   .aura-book-rank { left: 0.55rem; color: rgb(255 253 248 / 0.7); }
   .aura-book-score { right: 0.55rem; color: var(--book-accent); }
+
+  .aura-book-preview {
+    position: absolute;
+    bottom: calc(100% + 0.8rem);
+    left: 50%;
+    z-index: 30;
+    display: flex;
+    width: min(16rem, 42vw);
+    max-height: min(25rem, 68vh);
+    flex-direction: column;
+    gap: 0.45rem;
+    overflow-y: auto;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d9d2c4;
+    background: #fffdf8;
+    box-shadow: 0 1rem 2.5rem rgb(25 37 54 / 0.2), 0 0 0 0.35rem rgb(255 253 248 / 0.2);
+    color: #192536;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 0.5rem);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+    visibility: hidden;
+  }
+
+  .aura-book-preview::after {
+    position: absolute;
+    bottom: -0.4rem;
+    left: calc(50% - 0.4rem);
+    width: 0.75rem;
+    height: 0.75rem;
+    border-right: 1px solid #d9d2c4;
+    border-bottom: 1px solid #d9d2c4;
+    background: #fffdf8;
+    content: "";
+    transform: rotate(45deg);
+  }
+
+  .aura-book-row-top .aura-book-preview {
+    top: calc(100% + 0.8rem);
+    bottom: auto;
+  }
+
+  .aura-book-row-top .aura-book-preview::after {
+    top: -0.4rem;
+    bottom: auto;
+    border-top: 1px solid #d9d2c4;
+    border-right: 0;
+    border-bottom: 0;
+    border-left: 1px solid #d9d2c4;
+    transform: rotate(45deg);
+  }
+
+  .aura-book-link:hover .aura-book-preview,
+  .aura-book-link:focus-visible .aura-book-preview,
+  .aura-book-link:focus-within .aura-book-preview {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    visibility: visible;
+  }
+
+  .aura-book-preview-kicker,
+  .aura-book-preview-label {
+    color: #0f6b62;
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .aura-book-preview-title {
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: 1.2rem;
+    line-height: 1.1;
+  }
+
+  .aura-book-preview-author {
+    color: #596577;
+    font-size: 0.78rem;
+  }
+
+  .aura-book-preview-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.7rem;
+    border-top: 1px solid #d9d2c4;
+    border-bottom: 1px solid #d9d2c4;
+    padding: 0.5rem 0;
+    color: #596577;
+    font-size: 0.72rem;
+  }
+
+  .aura-book-preview-meta b { color: #0f6b62; }
+
+  .aura-book-preview-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .aura-book-preview-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .aura-book-preview-tags span {
+    border: 1px solid #d9d2c4;
+    background: #f5f1e8;
+    padding: 0.18rem 0.4rem;
+    color: #596577;
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .aura-book-preview-reasons {
+    display: grid;
+    gap: 0.22rem;
+    color: #192536;
+    font-size: 0.73rem;
+    line-height: 1.35;
+  }
 
   .aura-shelf-board {
     position: absolute;
@@ -340,6 +480,8 @@
     .aura-shelf-scene { height: 25rem; }
     .aura-shelf-unit { inset-inline: 0; transform: rotateX(1deg) rotateY(-2deg); }
     .aura-book-row { right: 5%; left: 5%; gap: 0.3rem; padding-inline: 0.15rem; }
+    .aura-book-title { font-size: clamp(0.62rem, 2.2vw, 0.82rem); }
+    .aura-book-preview { width: min(14rem, calc(100vw - 2.5rem)); max-height: min(23rem, 58vh); }
     .aura-shelf-rail { width: 0.85rem; }
     .aura-shelf-board { height: 0.85rem; }
   }

@@ -11,9 +11,9 @@ const PALETTES = [
   { color: "#6b4a58", shadow: "#49313d", ink: "#fffdf8", accent: "#e7b5a9" },
 ] as const;
 
-const BOOK_HEIGHTS = ["84%", "98%", "75%", "91%", "78%", "95%"];
-const BOOK_WIDTHS = ["88%", "94%", "82%", "90%", "84%", "92%"];
-const BOOK_TILTS = ["-3deg", "2deg", "-1deg", "3deg", "-2deg", "1deg"];
+const BOOK_HEIGHTS = ["88%", "98%", "80%", "94%", "82%", "96%"];
+const BOOK_WIDTHS = ["38%", "44%", "34%", "42%", "36%", "43%"];
+const BOOK_TILTS = ["-2deg", "1deg", "-1deg", "2deg", "-2deg", "1deg"];
 
 function paletteFor(book: AuraRecommendation, rank: number) {
   const seed = Array.from(`${book.bookId}${book.title}`).reduce((sum, character) => sum + character.charCodeAt(0), rank);
@@ -45,7 +45,7 @@ export function AuraShelf3D({ books }: { books: AuraRecommendation[] }) {
           <p className="eyebrow">A little room on the shelf</p>
           <h3 className="mt-2 font-display text-3xl font-bold">Step inside your recommendations</h3>
         </div>
-        <p className="max-w-sm text-sm leading-6 text-muted">Every spine is a ranked match. Choose one to open its full book detail.</p>
+        <p className="max-w-sm text-sm leading-6 text-muted">Every cover is a ranked match. Choose one to open its full book detail.</p>
       </div>
 
       <div className="aura-shelf-stage">
@@ -66,7 +66,7 @@ export function AuraShelf3D({ books }: { books: AuraRecommendation[] }) {
 
       <div className="aura-shelf-caption">
         <span className="aura-shelf-caption-mark" aria-hidden="true">✦</span>
-        <p><strong>Pick a spine.</strong> The list view keeps every reason, score, and matched tag close at hand.</p>
+        <p><strong>Pick a book.</strong> The list view keeps every reason, score, and matched tag close at hand.</p>
       </div>
     </section>
   );
@@ -83,13 +83,37 @@ function ShelfRow({ books, startRank, position }: { books: AuraRecommendation[];
               to={`/books/${book.bookId}`}
               className="aura-book-link"
               aria-label={`Open aura pick ${rank}: ${book.title}. Score ${book.score}.`}
+              aria-describedby={`aura-preview-${book.bookId}`}
             >
-              <span className="aura-book-spine">
+              <span className="aura-book-cover">
+                <span className="aura-book-cover-frame" aria-hidden="true" />
                 <span className="aura-book-crest" aria-hidden="true">✦</span>
                 <span className="aura-book-title">{book.title}</span>
-                <span className="aura-book-author" aria-hidden="true">{book.authors[0] ?? "BookAura collection"}</span>
+                <span className="aura-book-author">{book.authors.join(", ") || "BookAura collection"}</span>
                 <span className="aura-book-rank" aria-hidden="true">0{rank}</span>
                 <span className="aura-book-score" aria-hidden="true">{book.score}</span>
+              </span>
+              <span id={`aura-preview-${book.bookId}`} className="aura-book-preview" role="tooltip">
+                <span className="aura-book-preview-kicker">Aura pick #{rank}</span>
+                <strong className="aura-book-preview-title">{book.title}</strong>
+                <span className="aura-book-preview-author">{book.authors.join(", ") || "Author not listed"}</span>
+                <span className="aura-book-preview-meta">
+                  <span><b>{book.score}</b> aura score</span>
+                  <span>{book.availableQuantity > 0 ? `${book.availableQuantity} available` : "All copies borrowed"}</span>
+                  {book.pageCount && <span>{book.pageCount} pages</span>}
+                </span>
+                {book.matchedTags.length > 0 && (
+                  <span className="aura-book-preview-section">
+                    <span className="aura-book-preview-label">Matched signals</span>
+                    <span className="aura-book-preview-tags">{book.matchedTags.map((tag) => <span key={tag}>{tag}</span>)}</span>
+                  </span>
+                )}
+                {book.reasons.length > 0 && (
+                  <span className="aura-book-preview-section">
+                    <span className="aura-book-preview-label">Why it fits</span>
+                    <span className="aura-book-preview-reasons">{book.reasons.map((reason) => <span key={reason}>✦ {reason}</span>)}</span>
+                  </span>
+                )}
               </span>
             </Link>
           </li>
