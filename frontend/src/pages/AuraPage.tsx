@@ -7,6 +7,7 @@ import {
   getCategoryNames, hasAuraSignals, readAuraSearch, writeAuraSearch,
   type AuraRecommendation, type AuraSearch,
 } from "../aura/aura-api";
+import { AuraResultView } from "../aura/AuraResultView";
 import { EmptyState, QueryError } from "../components/QueryState";
 import { toDisplayError } from "../lib/api-error";
 
@@ -143,9 +144,14 @@ function AuraPageInner({ applied, onApply, onReset }: {
             message="The shelf has no strong match for those signals. Try a broader mood, drop the time limit, or add more books to the collection." />
         )}
         {aura.data && aura.data.length > 0 && (
-          <ol className="grid gap-5 md:grid-cols-2">
-            {aura.data.map((book, index) => <AuraCard key={book.bookId} book={book} rank={index + 1} />)}
-          </ol>
+          <AuraResultView
+            books={aura.data}
+            fallback={(
+              <ol className="grid gap-5 md:grid-cols-2">
+                {aura.data.map((book, index) => <AuraCard key={book.bookId} book={book} rank={index + 1} />)}
+              </ol>
+            )}
+          />
         )}
         {!hasAuraSignals(applied) && (
           <EmptyState title="The shelf is listening"

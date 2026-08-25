@@ -47,6 +47,304 @@
   .feature-card { @apply border border-line bg-surface p-7 transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-card; }
 }
 
+@layer components {
+  .aura-shelf {
+    border: 1px solid #d9d2c4;
+    background: #fffdf8;
+    padding: clamp(1.25rem, 4vw, 2.25rem);
+  }
+
+  .aura-shelf-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .aura-shelf-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    margin-top: 1.75rem;
+    border: 1px solid #d9d2c4;
+    background: #e8e0d2;
+    padding: clamp(0.75rem, 3vw, 2.5rem);
+  }
+
+  .aura-shelf-stage::after {
+    position: absolute;
+    right: 12%;
+    bottom: 1.5rem;
+    left: 12%;
+    z-index: -1;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgb(25 37 54 / 0.22);
+    box-shadow: 0 0 2rem 1rem rgb(25 37 54 / 0.1);
+    content: "";
+    filter: blur(8px);
+  }
+
+  .aura-shelf-scene {
+    position: relative;
+    height: clamp(24rem, 52vw, 35rem);
+    max-width: 58rem;
+    margin: 0 auto;
+    perspective: 1400px;
+  }
+
+  .aura-shelf-unit {
+    position: absolute;
+    inset: 1rem 2.5%;
+    transform: rotateX(2deg) rotateY(-5deg);
+    transform-style: preserve-3d;
+  }
+
+  .aura-shelf-back {
+    position: absolute;
+    inset: 0;
+    border: 1px solid #192536;
+    background: #283938;
+    box-shadow: inset 0 0 5rem rgb(15 107 98 / 0.2), 0 1rem 2rem rgb(25 37 54 / 0.25);
+    transform: translateZ(-2.25rem);
+  }
+
+  .aura-shelf-back::before,
+  .aura-shelf-back::after {
+    position: absolute;
+    top: 9%;
+    bottom: 9%;
+    width: 1px;
+    background: rgb(255 253 248 / 0.13);
+    content: "";
+  }
+
+  .aura-shelf-back::before { left: 7%; }
+  .aura-shelf-back::after { right: 7%; }
+
+  .aura-shelf-glow {
+    position: absolute;
+    z-index: 1;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background: #e4b86e;
+    box-shadow: 0 0 1.8rem 0.7rem rgb(228 184 110 / 0.28);
+    animation: aura-shelf-breathe 5s ease-in-out infinite;
+  }
+
+  .aura-shelf-glow-one { top: 14%; left: 14%; }
+  .aura-shelf-glow-two { right: 15%; bottom: 28%; animation-delay: -2.2s; }
+
+  .aura-book-row {
+    position: absolute;
+    right: 7%;
+    left: 7%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+    gap: clamp(0.45rem, 2vw, 1.4rem);
+    height: 43%;
+    margin: 0;
+    padding: 0 clamp(0.35rem, 2vw, 1.2rem);
+    list-style: none;
+    transform: translateZ(1.6rem);
+    transform-style: preserve-3d;
+  }
+
+  .aura-book-row-top { top: 3%; }
+  .aura-book-row-bottom { bottom: 8%; }
+
+  .aura-book-slot {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 0;
+    height: 100%;
+    transform-style: preserve-3d;
+  }
+
+  .aura-book-link {
+    position: relative;
+    display: block;
+    width: min(var(--book-width), 100%);
+    height: var(--book-height);
+    border: 0;
+    color: var(--book-ink);
+    transform: translateZ(1.2rem) rotateY(var(--book-tilt));
+    transform-style: preserve-3d;
+    transition: transform 220ms ease, filter 220ms ease;
+  }
+
+  .aura-book-link:hover,
+  .aura-book-link:focus-visible {
+    z-index: 5;
+    filter: brightness(1.08);
+    transform: translate3d(0, -0.9rem, 3.2rem) rotateY(var(--book-tilt));
+  }
+
+  .aura-book-link:focus-visible {
+    outline: 3px solid #f5d18d;
+    outline-offset: 5px;
+  }
+
+  .aura-book-link::before,
+  .aura-book-link::after {
+    position: absolute;
+    display: block;
+    content: "";
+    pointer-events: none;
+  }
+
+  .aura-book-link::before {
+    top: 0.25rem;
+    right: -0.75rem;
+    bottom: 0.25rem;
+    width: 0.75rem;
+    border: 1px solid rgb(25 37 54 / 0.35);
+    background: #e2d6c0;
+    box-shadow: inset -0.18rem 0 rgb(25 37 54 / 0.09);
+    transform: rotateY(90deg);
+    transform-origin: left center;
+  }
+
+  .aura-book-link::after {
+    top: -0.65rem;
+    right: 0.25rem;
+    left: 0.25rem;
+    height: 0.65rem;
+    border: 1px solid rgb(25 37 54 / 0.35);
+    background: var(--book-shadow);
+    transform: rotateX(90deg);
+    transform-origin: bottom center;
+  }
+
+  .aura-book-spine {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid rgb(255 253 248 / 0.42);
+    background: var(--book-color);
+    box-shadow: inset 0.45rem 0 rgb(255 253 248 / 0.08), inset -0.45rem 0 rgb(25 37 54 / 0.12), 0 0.4rem 0.7rem rgb(25 37 54 / 0.22);
+    backface-visibility: hidden;
+  }
+
+  .aura-book-crest {
+    display: grid;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: 0.7rem;
+    place-items: center;
+    border: 1px solid var(--book-accent);
+    color: var(--book-accent);
+    font-size: 0.6rem;
+    transform: rotate(45deg);
+  }
+
+  .aura-book-title {
+    max-height: 67%;
+    margin-top: 0.8rem;
+    overflow: hidden;
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: clamp(0.68rem, 1.25vw, 0.92rem);
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    text-overflow: ellipsis;
+    writing-mode: vertical-rl;
+  }
+
+  .aura-book-author {
+    max-height: 38%;
+    margin-top: auto;
+    margin-bottom: 1.9rem;
+    overflow: hidden;
+    color: rgb(255 253 248 / 0.75);
+    font-size: clamp(0.48rem, 0.85vw, 0.62rem);
+    letter-spacing: 0.04em;
+    text-overflow: ellipsis;
+    writing-mode: vertical-rl;
+  }
+
+  .aura-book-rank,
+  .aura-book-score {
+    position: absolute;
+    bottom: 0.55rem;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+  }
+
+  .aura-book-rank { left: 0.55rem; color: rgb(255 253 248 / 0.7); }
+  .aura-book-score { right: 0.55rem; color: var(--book-accent); }
+
+  .aura-shelf-board {
+    position: absolute;
+    right: 2%;
+    left: 2%;
+    z-index: 4;
+    height: 1.15rem;
+    border: 1px solid #432e22;
+    background: #704b31;
+    box-shadow: 0 0.6rem 0.8rem rgb(25 37 54 / 0.24), inset 0 0.2rem rgb(255 253 248 / 0.1);
+    transform: translateZ(2.3rem) rotateX(-7deg);
+    transform-origin: center top;
+  }
+
+  .aura-shelf-board-top { top: 48%; }
+  .aura-shelf-board-bottom { bottom: 1%; }
+
+  .aura-shelf-rail {
+    position: absolute;
+    top: -1%;
+    bottom: -1%;
+    z-index: 4;
+    width: 1.35rem;
+    border: 1px solid #432e22;
+    background: #704b31;
+    box-shadow: inset 0 0.2rem rgb(255 253 248 / 0.1), 0 0 0.8rem rgb(25 37 54 / 0.2);
+    transform: translateZ(1.7rem);
+  }
+
+  .aura-shelf-rail-left { left: 2%; }
+  .aura-shelf-rail-right { right: 2%; }
+
+  .aura-shelf-caption {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    margin-top: 1rem;
+    color: #596577;
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .aura-shelf-caption-mark {
+    flex: 0 0 auto;
+    color: #b57925;
+    font-size: 1.1rem;
+  }
+
+  @keyframes aura-shelf-breathe {
+    0%, 100% { opacity: 0.55; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.12); }
+  }
+
+  @media (max-width: 640px) {
+    .aura-shelf-heading { display: block; }
+    .aura-shelf-heading > p { margin-top: 0.75rem; }
+    .aura-shelf-scene { height: 25rem; }
+    .aura-shelf-unit { inset-inline: 0; transform: rotateX(1deg) rotateY(-2deg); }
+    .aura-book-row { right: 5%; left: 5%; gap: 0.3rem; padding-inline: 0.15rem; }
+    .aura-shelf-rail { width: 0.85rem; }
+    .aura-shelf-board { height: 0.85rem; }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
