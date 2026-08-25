@@ -3,7 +3,7 @@
 Product: **BookAura** — library management system. Browse → borrow → return → history.
 NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
-## Implementation status (verified 2026-08-23)
+## Implementation status (verified 2026-08-25)
 
 - ✅ Bootstrap + Auth Core (P0-A #1–9): implemented; auth regression suite passing.
 - ✅ Book backend (P0-A #10–14): CRUD, soft delete, ISBN validation, Specification filters,
@@ -27,9 +27,9 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 - ✅ Mocked phone OTP P0-B (#34): enumeration-safe request, in-memory `FakeSmsSender`,
   five-minute hashed code, silent cooldown, five-attempt/single-use confirmation, normal app session,
   phone login UI and ADMIN-only local outbox with no raw OTP logs.
-- ⏳ Facebook OAuth remains pending.
-- Evidence: `./mvnw verify` = **59 backend tests, 0 failures/errors**; frontend **23 tests**,
-  Oxlint and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
+- ✅ Facebook OAuth P0-B (#35): completed 2026-08-24 (D29).
+- Evidence: clean `./mvnw verify` = **75 backend tests, 0 failures/errors**; frontend **34 tests**,
+  Oxlint, TypeScript and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
   Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
   maintenance 200→503→200 all passed.
 
@@ -67,7 +67,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 ## P2 — Wow features (cut from bottom upward under time pressure)
 
 36. ~~Shelf Aura — deterministic `RuleBasedRecommendationEngine` (score + human-readable reasons + matched tags)~~ ✅ done 2026-08-25 (D30)
-37. 3D bookshelf (lazy chunk, 2D fallback, `prefers-reduced-motion`)
+37. ~~3D bookshelf (lazy chunk, 2D fallback, `prefers-reduced-motion`)~~ ✅ done 2026-08-25 (D31)
 38. Real SMS gateway
 39. Experimental AI (`EmbeddingRecommendationEngine` stub behind interface + feature flag only)
 

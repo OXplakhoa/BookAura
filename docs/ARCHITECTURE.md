@@ -65,6 +65,9 @@ BrowserRouter
 - React Hook Form + Zod provide on-blur field validation; backend `ApiError.validationErrors` remain authoritative.
 - ADMIN screens are lazy route chunks; responsive layouts use semantic landmarks, visible focus, 44px targets,
   reduced-motion behavior and explicit loading/error/empty/success states.
+- Shelf Aura keeps its existing 2D recommendation cards as the source of truth and fallback. Eligible browsers
+  can opt into a dependency-free CSS 3D shelf through a separate `React.lazy` chunk; `prefers-reduced-motion`,
+  missing CSS 3D support, or a chunk/render failure selects the list view automatically.
 
 ## Deployment model (demo = local)
 

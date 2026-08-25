@@ -196,3 +196,14 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Enhancement:** added bounded alias vocabulary (`Philosophy` → `philosophical`, `reflective`, `meditative`, `essays`, etc.); direct theme category = +4, alias/exact tag signal = +3; kept themes as soft preferences rather than filters.
 - **Transparency:** API now returns `breakdown.mood/theme/time/intensity`; reasons include each contribution, including negative time penalties. React cards render the four-part breakdown.
 - **Regression proof:** added alias and breakdown assertions; final clean suite is **75/75 backend** and **27/27 frontend**.
+
+---
+
+## 2026-08-25 — Session 5: 3D Shelf Aura (#37)
+
+- **Goal:** add a distinctive 3D bookshelf to `/aura` without changing the deterministic recommendations or weakening the 2D reading path.
+- **Files:** `frontend/src/aura/AuraShelf3D.tsx`, `AuraResultView.tsx`, `aura-view.ts`, view-selection/navigation tests, `AuraPage.tsx`, `index.css`; architecture/requirements/decision/wireframe docs.
+- **Important review points:** the 3D scene is dependency-free CSS `perspective`/`preserve-3d` in a separate `React.lazy` chunk; it consumes the existing `AuraRecommendation[]`; every spine is a keyboard-focusable React Router link to `/books/:bookId`; list view remains one click away.
+- **Fallback behavior:** CSS capability detection, `prefers-reduced-motion`, and a render/lazy-load error boundary select the existing 2D cards. While the chunk loads, cards remain visible; reduced-motion users never load the 3D scene.
+- **Tests/commands executed:** frontend **34/34 pass**, Oxlint pass, TypeScript pass, Vite build pass; build emitted a separate `AuraShelf3D` chunk (**3.74 kB**, 1.28 kB gzip). Browser smoke covered desktop/mobile layout and spine navigation; backend unchanged; clean backend `./mvnw clean verify` also remained green at **75/75**.
+- **Result:** P2 #37 implementation complete on `feat/3d-bookshelf`; final branch/merge evidence follows after review.

@@ -83,9 +83,10 @@ CSV IMPORT (modal)                 SYSTEM CONFIG
 ┌────────────────────────────────────────────┐
 │ Mood [chips] Time [slider] Themes [chips]  │
 │ Intensity [light ▾]      [ Find my aura ]  │
+│ [3D shelf] [List view]                    │
 │ ┌──────── 3D shelf (lazy) ────────┐        │   2D fallback: ranked card list
 │ │  glowing books on shelf, mood   │        │   with score + "why suggested"
 │ │  lighting; click → book detail  │        │   + matched tags
-│ └─────────────────────────────────┘        │
+│ └─────────────────────────────────┘        │   reduced motion → list view
 └────────────────────────────────────────────┘
 ```

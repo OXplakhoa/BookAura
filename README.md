@@ -100,7 +100,7 @@ service outcome/duration without arguments or return values.
 ## Implemented frontend journeys
 
 - Public editorial landing page, URL-backed catalog filters, availability and book detail.
-- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags.
+- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags; eligible browsers also get a lazy CSS 3D shelf with an explicit list toggle and reduced-motion fallback.
 - Registration, email-link verification, password/phone-code login, Google OIDC and verified six-digit change-email;
   access token is memory-only, refresh cookie is HttpOnly.
 - Member borrow, active loans, due/overdue state, confirmed return and permanent history.
