@@ -28,10 +28,15 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
   five-minute hashed code, silent cooldown, five-attempt/single-use confirmation, normal app session,
   phone login UI and ADMIN-only local outbox with no raw OTP logs.
 - ✅ Facebook OAuth P0-B (#35): completed 2026-08-24 (D29).
-- Evidence: clean `./mvnw verify` = **75 backend tests, 0 failures/errors**; frontend **36 tests**,
-  Oxlint, TypeScript and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
-  Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
-  maintenance 200→503→200 all passed.
+- ✅ Real SMS gateway option P2 (#38): credential-conditional `BrevoSmsSender` for non-local/test profiles;
+  local/test remain in-memory fake, missing/unsupported configuration remains `SMS_DELIVERY_UNAVAILABLE`,
+  and provider failure rolls back the newly-created OTP token.
+- ✅ Experimental AI P2 (#39): opt-in `EmbeddingRecommendationEngine` behind
+  `AURA_RECOMMENDATION_ENGINE=embedding`; deterministic offline signed-hash vectors, active-only top-six
+  ranking, semantic reasons/matched tags, and neutral rule breakdown. `rule` remains the default.
+- ✅ Frontend language switcher: Vietnamese (`VN`) by default, English (`EN`) toggle, browser preference persistence, and localized public/auth/member/admin copy.
+- Evidence: clean `./mvnw clean verify` = **89 backend tests, 0 failures/errors**; frontend **37 tests**,
+  Oxlint, TypeScript and production build pass. Live Brevo delivery is not claimed without a key/credits.
 
 ## P0-A — Must work (demo-critical)
 
@@ -68,8 +73,8 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
 36. ~~Shelf Aura — deterministic `RuleBasedRecommendationEngine` (score + human-readable reasons + matched tags)~~ ✅ done 2026-08-25 (D30)
 37. ~~3D bookshelf (lazy chunk, 2D fallback, `prefers-reduced-motion`)~~ ✅ done 2026-08-25 (D32)
-38. Real SMS gateway
-39. Experimental AI (`EmbeddingRecommendationEngine` stub behind interface + feature flag only)
+38. ✅ Real SMS gateway option — credential-conditional Brevo transactional sender; no live delivery claim without prepaid credits
+39. ✅ Experimental AI — offline deterministic pseudo-embedding behind `AURA_RECOMMENDATION_ENGINE`; rule engine remains default
 
 ## Explicit exclusions (Assignment 1)
 

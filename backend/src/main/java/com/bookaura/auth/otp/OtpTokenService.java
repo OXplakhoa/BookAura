@@ -33,7 +33,7 @@ public class OtpTokenService {
     }
 
     /** Creates a new secret (enforcing resend cooldown) and returns the RAW value to deliver out-of-band. */
-    @Transactional
+    @Transactional(noRollbackFor = BusinessException.class)
     public String createToken(UserAccount user, String target, OtpPurpose purpose, Duration ttl, boolean sixDigitCode) {
         repository.findTopByUserAccountAndPurposeOrderByLastSentAtDesc(user, purpose)
                 .filter(latest -> latest.getLastSentAt().plus(RESEND_COOLDOWN).isAfter(Instant.now()))

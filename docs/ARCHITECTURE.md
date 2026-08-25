@@ -13,7 +13,8 @@ com.bookaura
   member/        admin member management
   loan/          borrow/return, inventory
   systemconfig/  maintenance mode + filter
-  recommendation/ RecommendationEngine + RuleBasedRecommendationEngine (P2)
+  recommendation/ RecommendationEngine + RuleBasedRecommendationEngine + EmbeddingRecommendationEngine (P2)
+  auth/sms/     SmsSender + local fake + credential-conditional Brevo client
 ```
 
 Rules: thin controllers · business logic in `@Transactional` services · repositories = persistence only ·
@@ -45,6 +46,15 @@ HTTP → TraceIdFilter (MDC traceId + X-Trace-Id header)
   only a 60-second opaque exchange code. DB stores its SHA-256 hash; atomic consume issues the same app
   session as password login. JWT/provider tokens never enter redirect URLs. The OAuth handshake uses a
   transient `JSESSIONID` only for authorization state and invalidates it immediately after callback.
+- Phone OTP delivery is selected by profile/configuration: local/test always use the in-memory fake;
+  non-local/test use Brevo only when `SMS_PROVIDER=brevo` and `BREVO_SMS_API_KEY` is nonblank, otherwise
+  `UnavailableSmsSender` preserves `SMS_DELIVERY_UNAVAILABLE`. The request transaction includes token creation
+  and provider delivery, so a known provider failure rolls back the new OTP row. Brevo request bodies and
+  response bodies are never logged; only safe status metadata is logged.
+- Recommendation selection is property-conditional: `rule` (default) creates the explainable additive scorer;
+  `embedding` creates a local deterministic 128-dimensional signed-hash scorer. The latter reads active books
+  only, caps results at six, and returns semantic percentage reasons/matched tags while leaving rule breakdown
+  fields neutral; it performs no network calls.
 
 ## Frontend architecture
 
@@ -61,6 +71,7 @@ BrowserRouter
 - Axios attaches the bearer token, serializes concurrent 401 recovery behind one refresh promise, rotates
   through the HttpOnly cookie, retries each request once and clears identity if refresh fails.
 - React Query owns server state and invalidation; auth/maintenance remain small client-state contexts.
+- `LanguageProvider` defaults to Vietnamese (`vi`), offers English (`en`) through a shared VN/EN switcher, updates the document locale, and persists only the non-sensitive language preference in browser storage.
 - Catalog filters, allowlisted sort and page are URL state for deep links and predictable browser Back.
 - React Hook Form + Zod provide on-blur field validation; backend `ApiError.validationErrors` remain authoritative.
 - ADMIN screens are lazy route chunks; responsive layouts use semantic landmarks, visible focus, 44px targets,
@@ -76,6 +87,7 @@ BrowserRouter
 React SPA (localhost:5173) ──HTTPS/HTTP──▶ Spring Boot (localhost:8080) ──▶ PostgreSQL
                                               │                                (Docker local /
                               Brevo SMTP (email verification)                Supabase demo)
+                              Brevo SMS (optional prepaid, credential-conditional)
 ```
 
 `Dockerfile` + `docker-compose` exist for portability; no Render/Railway/Vercel unless P0 done.

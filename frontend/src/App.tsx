@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { RequireAuth } from "./auth/RequireAuth";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { AppShell } from "./layouts/AppShell";
+import { useLanguage } from "./i18n/language";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { AccountSettingsPage } from "./pages/AccountSettingsPage";
@@ -32,10 +33,11 @@ import { useSystemStatus } from "./system/use-system-status";
 
 export default function App() {
   const { maintenance } = useSystemStatus();
+  const { t } = useLanguage();
   if (maintenance) return <MaintenancePage />;
 
   return (
-    <Suspense fallback={<LoadingScreen label="Loading workspace" />}>
+    <Suspense fallback={<LoadingScreen label={t("loading.workspace")} />}>
     <Routes>
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />

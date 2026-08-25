@@ -38,6 +38,14 @@ bookaura:
     refresh-cookie-name: bookaura_refresh
     refresh-cookie-secure: true             # overridden to false only in local
   frontend-url: ${FRONTEND_URL:http://localhost:5173}
+  recommendation:
+    engine: ${AURA_RECOMMENDATION_ENGINE:rule} # rule (default) or embedding (offline experimental)
+  sms:
+    provider: ${SMS_PROVIDER:unavailable} # local/test profiles always use the fake sender
+    brevo:
+      base-url: ${BREVO_SMS_BASE_URL:https://api.brevo.com/v3}
+      api-key: ${BREVO_SMS_API_KEY:}
+      sender: ${BREVO_SMS_SENDER:BookAura}
   oauth:
     google:
       client-id: ${GOOGLE_CLIENT_ID:}

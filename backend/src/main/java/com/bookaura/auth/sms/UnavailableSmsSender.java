@@ -2,11 +2,6 @@ package com.bookaura.auth.sms;
 
 import com.bookaura.common.error.BusinessException;
 import com.bookaura.common.error.ErrorCode;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
-@Component
-@Profile("!local & !test")
 public class UnavailableSmsSender implements SmsSender {
 
     @Override

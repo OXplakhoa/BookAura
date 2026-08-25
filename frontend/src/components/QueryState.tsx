@@ -1,7 +1,9 @@
 import { AlertTriangle, Inbox, LoaderCircle, RefreshCw } from "lucide-react";
+import { useLanguage } from "../i18n/language";
 
-export function QueryError({ message = "We could not load this shelf.", retry }: { message?: string; retry: () => void }) {
-  return <div className="border border-red-200 bg-red-50 p-7 text-red-950" role="alert"><AlertTriangle size={28} className="text-danger" /><h2 className="mt-4 font-display text-2xl font-bold">Something interrupted the request</h2><p className="mt-2 text-sm leading-6">{message}</p><button type="button" className="button mt-5 border border-red-300 bg-white text-red-950 hover:bg-red-100" onClick={retry}><RefreshCw size={17} />Try again</button></div>;
+export function QueryError({ message, retry }: { message?: string; retry: () => void }) {
+  const { t } = useLanguage();
+  return <div className="border border-red-200 bg-red-50 p-7 text-red-950" role="alert"><AlertTriangle size={28} className="text-danger" /><h2 className="mt-4 font-display text-2xl font-bold">{t("query.title")}</h2><p className="mt-2 text-sm leading-6">{message ?? t("query.default")}</p><button type="button" className="button mt-5 border border-red-300 bg-white text-red-950 hover:bg-red-100" onClick={retry}><RefreshCw size={17} />{t("common.tryAgain")}</button></div>;
 }
 
 export function EmptyState({ title, message }: { title: string; message: string }) {

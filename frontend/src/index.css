@@ -265,6 +265,7 @@
   .arcane-reading__breakdown small { display: block; color: #84786c; font-size: 0.53rem; text-transform: uppercase; }
   .arcane-reading__breakdown b { display: block; margin-top: 0.2rem; color: #e8d8bd; font-size: 0.75rem; }
   .arcane-reading__breakdown .arcane-reading__negative { color: #dc8b83; }
+  .arcane-reading__semantic-note { margin: 0; border: 1px solid rgb(231 197 143 / 0.15); background: #110d0b; padding: 0.55rem 0.65rem; color: #c8b9a4; font-size: 0.68rem; line-height: 1.45; }
 
   .arcane-reading__section { display: grid; gap: 0.55rem; }
 

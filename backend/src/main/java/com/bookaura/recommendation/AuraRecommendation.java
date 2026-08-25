@@ -4,9 +4,10 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * One scored aura hit. {@code reasons} are human-readable rule explanations (why this book),
- * {@code breakdown} exposes exact signal contributions, and {@code matchedTags} are the concrete
- * book tags that fired — all required for an auditable P2 recommendation.
+ * One scored aura hit. {@code reasons} are human-readable engine explanations (why this book),
+ * {@code breakdown} exposes exact rule contributions when the rule engine is active, and
+ * {@code matchedTags} are the concrete book tags that fired — all required for an auditable P2
+ * recommendation. The experimental semantic engine keeps the rule breakdown neutral.
  */
 public record AuraRecommendation(
         UUID bookId,

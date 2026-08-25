@@ -216,3 +216,45 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Performance/fallback:** `@react-three/fiber` + `three` remain isolated in the existing lazy shelf boundary. The main bundle remains ~495 kB; the WebGL chunk is ~899 kB minified/~239 kB gzip. WebGL2 detection, reduced motion and render/chunk failures still select the existing 2D cards.
 - **Verification:** frontend **36/36 tests**, Oxlint, TypeScript and production build pass; clean backend verify remains **75/75**. Browser smoke verified real WebGL2 rendering, procedural covers, desktop chamber, mood copy, fixed panel and the 390px carousel.
 - **Decision:** D32 supersedes the visual/technology portion of D31; its lazy loading, direct detail navigation and 2D accessibility fallback remain intact.
+
+---
+
+## 2026-08-25 — Session 6: P2 #39 offline experimental AI + #38 credential-conditional SMS
+
+- **Goal:** implement the agreed offline pseudo-embedding recommendation engine and Brevo SMS option without
+  external AI cost, live SMS assumptions, secrets, or regressions to the default rule/fake flows.
+- **Files:** `recommendation/EmbeddingRecommendationEngine`, conditional recommendation beans and config;
+  `auth/sms/SmsSenderConfiguration`, `SmsProperties`, `BrevoSmsSender`; transactional phone request/OTP
+  rollback hardening; `.env.example`; frontend semantic-score wording; mentor demo/QA docs and architecture
+  decision/requirements/auth-flow updates.
+- **AI review points:** query moods expand through declared affinities, themes use bounded aliases, book title/
+  authors/categories/tags and page metadata become deterministic tokens, a signed 128-dimensional hash vector
+  is compared by cosine similarity, active books are ranked score-desc/title/id and capped at six. Semantic
+  reasons use normalized percentage text and honest token/tag intersections; `AuraScoreBreakdown` remains all
+  zero instead of inventing rule points. No HTTP client exists on this path.
+- **SMS review points:** local/test always instantiate `FakeSmsSender`; non-local/test select Brevo only for
+  `SMS_PROVIDER=brevo` with a nonblank `BREVO_SMS_API_KEY`; every other configuration selects
+  `UnavailableSmsSender`. Brevo uses the documented `POST /v3/transactionalSMS/sms` endpoint, configured
+  sender, normalized recipient, `api-key` header and transactional content. Provider bodies and raw phone/code/
+  key values never enter logs/errors. Official current endpoint documentation was checked at
+  `https://developers.brevo.com/reference/send-async-transactional-sms`.
+- **Problem found/correction:** adding an outer transaction to phone delivery initially made a caught
+  resend cooldown end as `UnexpectedRollbackException`; `OtpTokenService.createToken` now marks the known
+  `BusinessException` cooldown as no-rollback, while provider failures still escape and roll back the new row.
+  The regression test proves cooldown remains enumeration-safe and delivery failure leaves no OTP token.
+- **Tests/commands executed:** Brevo sender HTTP contract tests with a local JDK `HttpServer` (payload,
+  headers, 4xx and network failure); sender profile/configuration tests; phone OTP integration and provider
+  rollback integration; embedding unit and default/embedding Spring bean-selection tests. Clean backend
+  `./mvnw clean verify` → **89/89 tests pass**. Frontend `npm test -- --run` → **36/36**, Oxlint, TypeScript
+  and production build pass; the known lazy Arcane Opus chunk warning remains (~899 kB minified/~239 kB gzip).
+- **Result:** P2 #38/#39 implementation and documentation complete. No Brevo live request was made: the user
+  has no supplied API key/SMS credits, and live delivery remains explicitly unclaimed.
+
+## 2026-08-25 — Session 7: Vietnamese-first frontend language switcher
+
+- **Goal:** add a persistent VN/EN interface switch with Vietnamese as the default, then prepare the mentor demo artifacts in Vietnamese.
+- **Files:** `frontend/src/i18n/language.tsx`, `frontend/src/components/LanguageSwitcher.tsx`, app/layout/page/component localization updates, localized date formatting, language regression test; `README.md`, `docs/ARCHITECTURE.md`, `docs/REQUIREMENTS.md`, `docs/DECISIONS.md`, `docs/DEMO_SCRIPT.md`, `docs/MENTOR_QA.md`.
+- **Review points:** language state is frontend-only and non-sensitive; `document.documentElement.lang` follows the choice; browser storage keeps only the preference; book/user/backend data and API contracts are unchanged; reduced-motion/WebGL and auth flows remain intact.
+- **Validation:** frontend tests, Oxlint, TypeScript and production build rerun after the language changes; no real provider request or secret was introduced.
+- **Result:** Vietnamese is the fresh-install default, English remains one click away, and the two mentor documents are Vietnamese-first.
+- **Commit:** `39ffaa0`

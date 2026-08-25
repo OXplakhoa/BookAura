@@ -5,6 +5,7 @@ import com.bookaura.catalog.entity.Book;
 import com.bookaura.catalog.entity.Category;
 import com.bookaura.catalog.repository.BookRepository;
 import com.bookaura.common.logging.LogOperation;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,7 @@ import java.util.TreeSet;
  */
 @Service
 @LogOperation
+@ConditionalOnProperty(name = "bookaura.recommendation.engine", havingValue = "rule", matchIfMissing = true)
 public class RuleBasedRecommendationEngine implements RecommendationEngine {
 
     /** Casual sustained reading pace ≈ 40 pages/hour. */

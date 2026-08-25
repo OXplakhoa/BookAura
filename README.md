@@ -14,7 +14,7 @@ built as a **modular monolith** (Spring Boot + React SPA + PostgreSQL).
 | Frontend  | React 19, TypeScript, Vite, React Router, TanStack Query, Axios, React Hook Form + Zod, Tailwind CSS, React Three Fiber + Three.js |
 | Database  | PostgreSQL 16 — local: Docker, tests: Testcontainers, demo: Supabase (Postgres only, **no Supabase Auth**) |
 | Mail      | `EmailSender` abstraction — local: Mailpit, demo: Brevo SMTP via env vars |
-| SMS       | `SmsSender` abstraction — `FakeSmsSender` (console) for local demo only |
+| SMS       | `SmsSender` abstraction — local/test fake; credential-conditional Brevo transactional SMS outside local/test |
 
 ## Repository layout
 
@@ -67,12 +67,14 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 - Auth: `/api/auth/register`, `/verify-email`, `/login`, `/refresh`, `/logout`, `/me`;
   optional Google OIDC starts at `/oauth2/authorization/google`, Facebook OAuth2 at `/oauth2/authorization/facebook`;
   both exchange at `/api/auth/oauth/exchange`.
-- Phone OTP: `/api/auth/phone-otp/request` and `/confirm`; local fake SMS stays in memory and its
-  latest code is visible only to ADMIN at `/api/admin/dev/sms-outbox/latest`.
+- Phone OTP: `/api/auth/phone-otp/request` and `/confirm`; local/test fake SMS stays in memory and its
+  latest code is visible only to ADMIN in local at `/api/admin/dev/sms-outbox/latest`. Outside local/test,
+  `SMS_PROVIDER=brevo` plus `BREVO_SMS_API_KEY` enables Brevo; missing/unsupported configuration returns
+  the existing `SMS_DELIVERY_UNAVAILABLE` contract (no silent fake fallback).
 - Account: `POST /api/account/email-change/request` and `/confirm` implement hashed, expiring,
   cooldown/attempt-limited, single-use verification of the new email.
 - Public catalog: `GET /api/books`, `GET /api/books/{id}`, `GET /api/books/categories`
-- Public Shelf Aura: `GET /api/recommendations/aura?moods=cozy,dark&timeMinutes=180&themes=Poetry&intensity=light` (top 6, deterministic scores/reasons/breakdown; common theme aliases are explicit)
+- Public Shelf Aura: `GET /api/recommendations/aura?moods=cozy,dark&timeMinutes=180&themes=Poetry&intensity=light` (top 6, deterministic scores/reasons/breakdown; common theme aliases are explicit). Set `AURA_RECOMMENDATION_ENGINE=embedding` for the offline experimental hashed-vector engine; `rule` remains default.
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
 - Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
   ADMIN management under `/api/admin/loans`.
@@ -100,20 +102,23 @@ service outcome/duration without arguments or return values.
 ## Implemented frontend journeys
 
 - Public editorial landing page, URL-backed catalog filters, availability and book detail.
-- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags; WebGL-capable browsers also get the lazy React Three Fiber “Arcane Opus” chamber with procedural covers, mood-reactive light, an editorial preview panel, and reduced-motion/list fallback.
+- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags; WebGL-capable browsers also get the lazy React Three Fiber “Arcane Opus” chamber with procedural covers, mood-reactive light, an editorial preview panel, and reduced-motion/list fallback. The optional embedding flag labels semantic affinity and leaves rule breakdown fields neutral.
 - Registration, email-link verification, password/phone-code login, Google OIDC and verified six-digit change-email;
   access token is memory-only, refresh cookie is HttpOnly.
 - Member borrow, active loans, due/overdue state, confirmed return and permanent history.
 - ADMIN route-guarded workspaces: Book CRUD/archive/CSV, Member search/CRUD/disable,
   loan oversight/admin return and maintenance control.
 - Responsive app shell, accessible forms/dialogs, error/empty/loading states and lazy ADMIN routes.
+- Localized interface: Vietnamese (VN) is the default, English (EN) is available from the language switcher, and the preference persists in the browser.
 
 ## Environment variables
 
 See `.env.example`. Real secrets go in a local `.env` file — **never committed**
 (`.gitignore` enforces this). Demo email uses Brevo SMTP. Google OAuth is enabled only when both `GOOGLE_CLIENT_ID` and
 `GOOGLE_CLIENT_SECRET` are non-blank; Facebook likewise via `FACEBOOK_CLIENT_ID`/`FACEBOOK_CLIENT_SECRET`.
-local callbacks: `http://localhost:8080/login/oauth2/code/google` and `.../facebook`.
+SMS uses `SMS_PROVIDER=brevo`, `BREVO_SMS_API_KEY`, and optional base URL/sender settings only outside local/test;
+Brevo SMS is prepaid and has not been live-claimed without credentials/credits. Local callbacks:
+`http://localhost:8080/login/oauth2/code/google` and `.../facebook`.
 
 ## Docs
 
@@ -122,4 +127,6 @@ local callbacks: `http://localhost:8080/login/oauth2/code/google` and `.../faceb
 - [docs/ERD.md](docs/ERD.md) — data model
 - [docs/AUTH_FLOW.md](docs/AUTH_FLOW.md) — registration, login, refresh rotation, logout
 - [docs/DECISIONS.md](docs/DECISIONS.md) — all recorded decisions (ADR-lite)
+- [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — kịch bản demo mentor và các feature flag tùy chọn (tiếng Việt)
+- [docs/MENTOR_QA.md](docs/MENTOR_QA.md) — câu hỏi kiến trúc/bảo mật và bằng chứng cho mentor (tiếng Việt)
 - [docs/AI_WORKLOG.md](docs/AI_WORKLOG.md) — AI-assisted development evidence

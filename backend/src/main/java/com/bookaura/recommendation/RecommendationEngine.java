@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Pluggable recommender seam. RuleBasedRecommendationEngine is the deterministic default (P2 #36);
- * an EmbeddingRecommendationEngine stub may later sit behind the same interface + feature flag (P2 #39).
+ * EmbeddingRecommendationEngine is an opt-in, offline experimental implementation (P2 #39).
  */
 public interface RecommendationEngine {
 

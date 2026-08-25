@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { AuraRecommendation, AuraSearch } from "./aura-api";
 import { ArcaneShelfCanvas } from "./ArcaneShelfCanvas";
 import { resolveArcaneAtmosphere } from "./arcane-atmosphere";
+import { useLanguage } from "../i18n/language";
 
 const MOBILE_QUERY = "(max-width: 767px)";
 
@@ -28,6 +29,7 @@ function useMobileShelf(): boolean {
 export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; search: AuraSearch }) {
   const rankedBooks = books.slice(0, 6);
   const [activeIndex, setActiveIndex] = useState(0);
+  const { t } = useLanguage();
   const mobile = useMobileShelf();
   const navigate = useNavigate();
   const atmosphere = resolveArcaneAtmosphere(search);
@@ -55,18 +57,18 @@ export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; se
   return (
     <section
       className="arcane-opus"
-      aria-label="3D Shelf Aura"
+      aria-label={t("aura.arcaneLabel")}
       style={{ "--arcane-aura": atmosphere.aura, "--arcane-background": atmosphere.background } as CSSProperties}
     >
       <header className="arcane-opus__header">
         <div>
-          <p className="arcane-opus__eyebrow"><Sparkles size={14} aria-hidden="true" /> Shelf Aura · Arcane collection</p>
-          <h3>{atmosphere.name}</h3>
-          <p className="arcane-opus__incantation">{atmosphere.incantation}</p>
+          <p className="arcane-opus__eyebrow"><Sparkles size={14} aria-hidden="true" /> {t("aura.arcaneCollection")}</p>
+          <h3>{t(atmosphere.name)}</h3>
+          <p className="arcane-opus__incantation">{t(atmosphere.incantation)}</p>
         </div>
         <p className="arcane-opus__instructions">
           <span className="arcane-opus__instruction-mark" aria-hidden="true">✦</span>
-          Hover to consult a volume. Click to open it.
+          {t("aura.arcaneInstructions")}
         </p>
       </header>
 
@@ -75,7 +77,7 @@ export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; se
           className="arcane-opus__canvas-shell"
           tabIndex={0}
           onKeyDown={handleKeyboard}
-          aria-label={`Interactive enchanted shelf. Selected book ${activeIndex + 1} of ${rankedBooks.length}: ${activeBook.title}. Use arrow keys to explore and Enter to open.`}
+          aria-label={t("aura.arcaneInteractive", { selected: activeIndex + 1, total: rankedBooks.length, title: activeBook.title })}
         >
           <ArcaneShelfCanvas
             books={rankedBooks}
@@ -94,17 +96,17 @@ export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; se
 
       <footer className="arcane-opus__controls">
         {mobile && (
-          <button type="button" className="arcane-opus__arrow" aria-label="Previous recommendation" onClick={() => moveSelection(-1)}>
+          <button type="button" className="arcane-opus__arrow" aria-label={t("aura.previousRecommendation")} onClick={() => moveSelection(-1)}>
             <ChevronLeft size={19} aria-hidden="true" />
           </button>
         )}
-        <div className="arcane-opus__book-selector" role="group" aria-label="Preview a recommendation">
+        <div className="arcane-opus__book-selector" role="group" aria-label={t("aura.previewRecommendation")}>
           {rankedBooks.map((book, index) => (
             <button
               key={book.bookId}
               type="button"
               aria-pressed={index === activeIndex}
-              aria-label={`Preview aura pick ${index + 1}: ${book.title}`}
+              aria-label={t("aura.previewPick", { rank: index + 1, title: book.title })}
               title={book.title}
               onMouseEnter={() => setActiveIndex(index)}
               onFocus={() => setActiveIndex(index)}
@@ -116,7 +118,7 @@ export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; se
           ))}
         </div>
         {mobile && (
-          <button type="button" className="arcane-opus__arrow" aria-label="Next recommendation" onClick={() => moveSelection(1)}>
+          <button type="button" className="arcane-opus__arrow" aria-label={t("aura.nextRecommendation")} onClick={() => moveSelection(1)}>
             <ChevronRight size={19} aria-hidden="true" />
           </button>
         )}
@@ -126,53 +128,60 @@ export function AuraShelf3D({ books, search }: { books: AuraRecommendation[]; se
 }
 
 function AuraBookReading({ book, rank }: { book: AuraRecommendation; rank: number }) {
+  const { t } = useLanguage();
   const breakdown = [
-    ["Mood", book.breakdown.mood],
-    ["Theme", book.breakdown.theme],
-    ["Time", book.breakdown.time],
-    ["Pace", book.breakdown.intensity],
+    [t("aura.mood"), book.breakdown.mood],
+    [t("aura.theme"), book.breakdown.theme],
+    [t("aura.time"), book.breakdown.time],
+    [t("aura.pace"), book.breakdown.intensity],
   ] as const;
 
   return (
-    <aside className="arcane-reading" aria-label={`Aura reading for ${book.title}`}>
+    <aside className="arcane-reading" aria-label={t("aura.readingLabel", { title: book.title })}>
       <div className="arcane-reading__rank">
-        <span>Selected volume</span>
+        <span>{t("aura.selectedVolume")}</span>
         <strong>0{rank}</strong>
       </div>
 
       <div>
-        <p className="arcane-reading__kicker">The shelf has answered</p>
+        <p className="arcane-reading__kicker">{t("aura.shelfAnswered")}</p>
         <h4>{book.title}</h4>
-        <p className="arcane-reading__author">{book.authors.join(", ") || "Author not listed"}</p>
+        <p className="arcane-reading__author">{book.authors.join(", ") || t("book.authorUnknown")}</p>
       </div>
 
       <div className="arcane-reading__score-row">
-        <div><strong>{book.score}</strong><span>Aura score</span></div>
-        <div><strong>{book.availableQuantity}</strong><span>{book.availableQuantity === 1 ? "Copy available" : "Copies available"}</span></div>
-        <div><strong>{book.pageCount ?? "—"}</strong><span>Pages</span></div>
+        <div><strong>{book.score}</strong><span>{t("aura.auraScore")}</span></div>
+        <div><strong>{book.availableQuantity}</strong><span>{book.availableQuantity === 1 ? t("aura.copyAvailable") : t("aura.copiesAvailable")}</span></div>
+        <div><strong>{book.pageCount ?? "—"}</strong><span>{t("aura.pages")}</span></div>
       </div>
 
-      <div className="arcane-reading__breakdown" aria-label="Score breakdown">
-        {breakdown.map(([label, value]) => (
-          <span key={label}><small>{label}</small><b className={value < 0 ? "arcane-reading__negative" : ""}>{value > 0 ? `+${value}` : value}</b></span>
-        ))}
-      </div>
+      {breakdown.every(([, value]) => value === 0) ? (
+        <p className="arcane-reading__semantic-note" aria-label={t("aura.semanticTitle")}>
+          {t("aura.semanticMatch")}
+        </p>
+      ) : (
+        <div className="arcane-reading__breakdown" aria-label={t("aura.scoreBreakdown")}>
+          {breakdown.map(([label, value]) => (
+            <span key={label}><small>{label}</small><b className={value < 0 ? "arcane-reading__negative" : ""}>{value > 0 ? `+${value}` : value}</b></span>
+          ))}
+        </div>
+      )}
 
       {book.matchedTags.length > 0 && (
         <div className="arcane-reading__section">
-          <p>Resonant signs</p>
+          <p>{t("aura.resonantSigns")}</p>
           <div className="arcane-reading__tags">{book.matchedTags.slice(0, 4).map((tag) => <span key={tag}>{tag}</span>)}</div>
         </div>
       )}
 
       <div className="arcane-reading__section">
-        <p>Why this volume appeared</p>
+        <p>{t("aura.whyVolume")}</p>
         <ul>
           {book.reasons.slice(0, 2).map((reason) => <li key={reason}><Sparkles size={13} aria-hidden="true" />{reason}</li>)}
         </ul>
       </div>
 
-      <p className="arcane-reading__open-hint"><BookOpen size={16} aria-hidden="true" /> Click the book in the chamber to open its full record.</p>
+      <p className="arcane-reading__open-hint"><BookOpen size={16} aria-hidden="true" /> {t("aura.openHint")}</p>
     </aside>
   );
 }

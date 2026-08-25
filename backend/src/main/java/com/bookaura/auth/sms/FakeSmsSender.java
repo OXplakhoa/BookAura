@@ -1,8 +1,5 @@
 package com.bookaura.auth.sms;
 
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -10,8 +7,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 /**
  * Local/test-only in-memory SMS outbox. Raw OTP values are deliberately never logged.
  */
-@Component
-@Profile({"local", "test"})
 public class FakeSmsSender implements SmsSender {
 
     public record SentSms(String phone, String code, Instant sentAt) {

@@ -150,4 +150,24 @@ races return 409. The existing JWT remains valid because identity is the immutab
   so an otherwise active account does not require prior email verification for this alternate login.
 - `FakeSmsSender` exists only in local/test, stores raw codes in process memory and never logs them. Local demo
   retrieval is an ADMIN-authorized, local-profile-only outbox; HTTP response redaction hides `phone` and `code`.
-- Non-local/test profile uses `UnavailableSmsSender` and clearly reports that a real gateway is not configured.
+- Non-local/test profile without configured Brevo credentials uses `UnavailableSmsSender` and clearly reports that a real gateway is not configured.
+
+## Phone OTP login (credential-conditional Brevo delivery)
+
+The business flow is unchanged when delivery is real: `PhoneOtpService.request` normalizes the registered
+phone, creates a five-minute `PHONE_LOGIN` token and sends the generated six-digit code through `SmsSender`.
+The service method is transactional, so a known delivery failure rolls the new token row back and the user can
+retry rather than receiving a misleading usable code.
+
+Sender selection is explicit and mutually exclusive:
+
+| Environment/configuration | Sender | Behavior |
+|---|---|---|
+| `local` or `test` | `FakeSmsSender` | In-memory delivery only; no Brevo request |
+| non-local/test + `SMS_PROVIDER=brevo` + nonblank `BREVO_SMS_API_KEY` | `BrevoSmsSender` | `POST https://api.brevo.com/v3/transactionalSMS/sms` |
+| other non-local/test configuration | `UnavailableSmsSender` | Existing `SMS_DELIVERY_UNAVAILABLE` response |
+
+Brevo receives `api-key`, configured sender, normalized recipient and the transactional OTP message. Provider
+4xx/5xx responses, timeouts and network failures map to the safe application error; raw phone, OTP, API key
+and provider response bodies are not logged or returned. Brevo SMS is prepaid; this repository includes no live
+credential and makes no live-delivery claim.

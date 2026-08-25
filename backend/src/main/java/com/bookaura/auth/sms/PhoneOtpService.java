@@ -40,7 +40,12 @@ public class PhoneOtpService {
         this.authService = authService;
     }
 
-    /** Enumeration-safe for missing/disabled numbers. Existing-account cooldown remains enforced silently. */
+    /**
+     * Enumeration-safe for missing/disabled numbers. The token write shares this transaction with
+     * delivery so a known provider failure rolls the newly-created token back instead of leaving
+     * an undelivered code usable in the database.
+     */
+    @Transactional
     public void request(String rawPhone) {
         String phone = PhoneNormalizer.normalize(rawPhone);
         userRepository.findByPhone(phone)
