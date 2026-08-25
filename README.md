@@ -38,21 +38,28 @@ infra/      docker-compose, local infrastructure
 # 1. Infrastructure (PostgreSQL 16 + Mailpit on http://localhost:8025)
 docker compose -f infra/docker-compose.yml up -d
 
-# 2. Backend (local profile; Liquibase migrates an empty DB automatically)
-cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+# 2. Optional: copy and configure local credentials (never commit .env)
+cp .env.example .env
+# Put OAuth/Brevo credentials in .env if you want those optional integrations.
+
+# 3. Backend (local profile; this helper loads the repository-level .env)
+./scripts/run-local-backend.sh
 # API: http://localhost:8080  |  OpenAPI UI: http://localhost:8080/swagger-ui.html
 
-# 3. Frontend (use a second terminal because the backend command stays running)
+# 4. Frontend (use a second terminal because the backend command stays running)
 cd frontend
 npm install
 npm run dev
-# SPA: http://localhost:5173 (Vite proxies /api to localhost:8080)
+# SPA: http://localhost:5173 (Vite proxies /api to localhost:8080 and reads root VITE_* values)
 
 # IDE note: if a Java IDE auto-builds into target/, use a clean packaged JAR to avoid stale
 # IDE-compiled classes overwriting Maven output:
 # cd backend && ./mvnw clean package -DskipTests
 # java -jar target/bookaura-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
+
+# If you start Maven directly instead of the helper, load .env first:
+# set -a; source ../.env; set +a
+# ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 
 # Frontend quality gate
 npm test

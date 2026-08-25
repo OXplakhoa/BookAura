@@ -8,8 +8,11 @@ Giao diện mặc định là **Tiếng Việt (VN)**; dùng bộ chuyển **VN 
 ## 0. Khởi động demo
 
 ```bash
+# Nếu dùng credential local, tạo .env từ .env.example trước
+cp .env.example .env
+
 docker compose -f infra/docker-compose.yml up -d
-cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+./scripts/run-local-backend.sh
 # terminal thứ hai
 cd frontend && npm run dev
 ```
