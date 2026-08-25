@@ -72,7 +72,7 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
 - Account: `POST /api/account/email-change/request` and `/confirm` implement hashed, expiring,
   cooldown/attempt-limited, single-use verification of the new email.
 - Public catalog: `GET /api/books`, `GET /api/books/{id}`, `GET /api/books/categories`
-- Public Shelf Aura: `GET /api/recommendations/aura?moods=cozy,dark&timeMinutes=180&themes=Poetry&intensity=light` (top 6, deterministic scores/reasons)
+- Public Shelf Aura: `GET /api/recommendations/aura?moods=cozy,dark&timeMinutes=180&themes=Poetry&intensity=light` (top 6, deterministic scores/reasons/breakdown; common theme aliases are explicit)
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
 - Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
   ADMIN management under `/api/admin/loans`.

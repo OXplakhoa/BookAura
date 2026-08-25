@@ -5,7 +5,8 @@ import java.util.UUID;
 
 /**
  * One scored aura hit. {@code reasons} are human-readable rule explanations (why this book),
- * {@code matchedTags} are the concrete book tags that fired — both required by the P2 spec.
+ * {@code breakdown} exposes exact signal contributions, and {@code matchedTags} are the concrete
+ * book tags that fired — all required for an auditable P2 recommendation.
  */
 public record AuraRecommendation(
         UUID bookId,
@@ -16,6 +17,7 @@ public record AuraRecommendation(
         Integer pageCount,
         int availableQuantity,
         int score,
+        AuraScoreBreakdown breakdown,
         List<String> reasons,
         List<String> matchedTags
 ) {

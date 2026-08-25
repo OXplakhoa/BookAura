@@ -175,6 +175,8 @@ function AuraCard({ book, rank }: { book: AuraRecommendation; rank: number }) {
         </div>
       </div>
 
+      <ScoreBreakdown breakdown={book.breakdown} />
+
       <ul className="mt-4 space-y-1.5 text-sm leading-6 text-ink">
         {book.reasons.map((reason) => (
           <li key={reason} className="flex gap-2"><Sparkles size={14} className="mt-1.5 shrink-0 text-primary" aria-hidden="true" />{reason}</li>
@@ -190,6 +192,27 @@ function AuraCard({ book, rank }: { book: AuraRecommendation; rank: number }) {
           : <span className="ml-auto text-xs font-bold text-danger">All copies borrowed</span>}
       </div>
     </li>
+  );
+}
+
+function ScoreBreakdown({ breakdown }: { breakdown: AuraRecommendation["breakdown"] }) {
+  const parts = [
+    ["Mood", breakdown.mood],
+    ["Theme", breakdown.theme],
+    ["Time", breakdown.time],
+    ["Pace", breakdown.intensity],
+  ] as const;
+  return (
+    <div className="mt-4 grid grid-cols-2 border border-line bg-canvas sm:grid-cols-4" aria-label="Score breakdown">
+      {parts.map(([label, value]) => (
+        <div key={label} className="border-b border-line px-3 py-2 last:border-0 sm:border-b-0 sm:border-r sm:last:border-r-0">
+          <span className="block text-[10px] font-bold uppercase tracking-wider text-muted">{label}</span>
+          <span className={`block text-sm font-bold tabular-nums ${value < 0 ? "text-danger" : "text-ink"}`}>
+            {value > 0 ? `+${value}` : value}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 

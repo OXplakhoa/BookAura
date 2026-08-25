@@ -9,6 +9,12 @@ export interface AuraRecommendation {
   pageCount: number | null;
   availableQuantity: number;
   score: number;
+  breakdown: {
+    mood: number;
+    theme: number;
+    time: number;
+    intensity: number;
+  };
   reasons: string[];
   matchedTags: string[];
 }
