@@ -20,7 +20,7 @@ import java.util.TreeSet;
  * Deterministic Shelf Aura scorer (D30). Every point is traceable to a written rule:
  * <ul>
  *   <li>mood: +3 per matched book tag, +2 per matched category</li>
- *   <li>theme: +4 per matched category/tag (explicit picks are the strongest signal)</li>
+ *   <li>theme: +4 for a direct category match, +3 for a matching tag/known alias</li>
  *   <li>time: estimated minutes = pageCount × 1.5; fits budget well +4, quick fit +2,
  *       slightly over −2, way over −4; unknown pages = 0 (neutral)</li>
  *   <li>intensity: page band exact +2, adjacent +1; unknown pages = 0 (neutral)</li>
@@ -35,7 +35,8 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
     static final double MINUTES_PER_PAGE = 1.5;
     static final int MOOD_TAG_POINTS = 3;
     static final int MOOD_CATEGORY_POINTS = 2;
-    static final int THEME_POINTS = 4;
+    static final int THEME_CATEGORY_POINTS = 4;
+    static final int THEME_ALIAS_POINTS = 3;
     static final int TIME_PERFECT_POINTS = 4;
     static final int TIME_QUICK_POINTS = 2;
     static final int TIME_SLIGHTLY_OVER_PENALTY = -2;
@@ -56,7 +57,7 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
         List<AuraRecommendation> scored = new ArrayList<>();
         for (Book book : bookRepository.findByActiveTrue()) {
             ScoreCard card = score(book, query, normalizedThemes);
-            if (card.score > 0) {
+            if (card.total() > 0) {
                 scored.add(card.toRecommendation(book));
             }
         }
@@ -75,23 +76,34 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
         for (Mood mood : query.moods().stream().sorted().toList()) {
             Set<String> tagHits = intersect(bookTags, mood.tagAffinities());
             Set<String> categoryHits = intersect(bookCategories, mood.categoryAffinities());
-            card.score += tagHits.size() * MOOD_TAG_POINTS + categoryHits.size() * MOOD_CATEGORY_POINTS;
+            int tagPoints = tagHits.size() * MOOD_TAG_POINTS;
+            int categoryPoints = categoryHits.size() * MOOD_CATEGORY_POINTS;
+            card.moodPoints += tagPoints + categoryPoints;
             card.matchedTags.addAll(tagHits);
             tagHits.forEach(tag -> card.reasons.add(
-                    "Matches your " + mood.name().toLowerCase(Locale.ROOT) + " mood (tag: " + tag + ")"));
+                    "Matches your " + mood.name().toLowerCase(Locale.ROOT)
+                            + " mood (tag: " + tag + ", +" + MOOD_TAG_POINTS + ")"));
             String moodLabel = mood.name().toLowerCase(Locale.ROOT);
             String article = startsWithVowel(moodLabel) ? "an" : "a";
             categoryHits.forEach(category -> card.reasons.add(
-                    capitalize(category) + " fits " + article + " " + moodLabel + " mood"));
+                    capitalize(category) + " fits " + article + " " + moodLabel
+                            + " mood (+" + MOOD_CATEGORY_POINTS + ")"));
         }
 
         for (String theme : themes.stream().sorted(String.CASE_INSENSITIVE_ORDER).toList()) {
             boolean categoryHit = bookCategories.contains(theme);
-            boolean tagHit = bookTags.contains(theme);
-            if (categoryHit || tagHit) {
-                card.score += THEME_POINTS;
-                if (tagHit) card.matchedTags.add(theme);
-                card.reasons.add("In your theme: " + capitalize(theme));
+            Set<String> themeTagHits = intersect(bookTags, ThemeAliases.forTheme(theme));
+            if (categoryHit) {
+                card.themePoints += THEME_CATEGORY_POINTS;
+                card.reasons.add("In your theme: " + capitalize(theme)
+                        + " category (+" + THEME_CATEGORY_POINTS + ")");
+            }
+            if (!themeTagHits.isEmpty()) {
+                card.themePoints += THEME_ALIAS_POINTS;
+                card.matchedTags.addAll(themeTagHits);
+                card.reasons.add("In your theme: " + capitalize(theme)
+                        + " via tag " + String.join(", ", themeTagHits)
+                        + " (+" + THEME_ALIAS_POINTS + ")");
             }
         }
 
@@ -100,22 +112,27 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
             double budget = query.timeMinutes();
             if (estimatedMinutes <= budget) {
                 boolean fillsWell = estimatedMinutes >= budget * 0.6;
-                card.score += fillsWell ? TIME_PERFECT_POINTS : TIME_QUICK_POINTS;
+                card.timePoints += fillsWell ? TIME_PERFECT_POINTS : TIME_QUICK_POINTS;
                 card.reasons.add("≈" + toHoursLabel(estimatedMinutes)
-                        + (fillsWell ? " — fills your time nicely" : " — a quick fit for your slot"));
+                        + (fillsWell ? " — fills your time nicely (+" + TIME_PERFECT_POINTS + ")"
+                        : " — a quick fit for your slot (+" + TIME_QUICK_POINTS + ")"));
             } else {
-                card.score += estimatedMinutes <= budget * 1.5
+                card.timePoints += estimatedMinutes <= budget * 1.5
                         ? TIME_SLIGHTLY_OVER_PENALTY : TIME_WAY_OVER_PENALTY;
+                card.reasons.add("≈" + toHoursLabel(estimatedMinutes) + " exceeds your time budget ("
+                        + card.timePoints + ")");
             }
         }
 
         if (query.intensity() != null && book.getPageCount() != null) {
             if (query.intensity().contains(book.getPageCount())) {
-                card.score += INTENSITY_EXACT_POINTS;
+                card.intensityPoints += INTENSITY_EXACT_POINTS;
                 card.reasons.add(query.intensity().name().toLowerCase(Locale.ROOT)
-                        + " read — matches your pace");
+                        + " read — matches your pace (+" + INTENSITY_EXACT_POINTS + ")");
             } else if (query.intensity().adjacentTo(book.getPageCount())) {
-                card.score += INTENSITY_ADJACENT_POINTS;
+                card.intensityPoints += INTENSITY_ADJACENT_POINTS;
+                card.reasons.add("near your " + query.intensity().name().toLowerCase(Locale.ROOT)
+                        + " pace (+" + INTENSITY_ADJACENT_POINTS + ")");
             }
         }
         return card;
@@ -149,9 +166,16 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
 
     /** Mutable accumulator while a book is being scored; reasons/tags keep insertion order. */
     private static final class ScoreCard {
-        private int score;
+        private int moodPoints;
+        private int themePoints;
+        private int timePoints;
+        private int intensityPoints;
         private final List<String> reasons = new ArrayList<>();
         private final Set<String> matchedTags = new LinkedHashSet<>();
+
+        int total() {
+            return moodPoints + themePoints + timePoints + intensityPoints;
+        }
 
         AuraRecommendation toRecommendation(Book book) {
             return new AuraRecommendation(
@@ -161,7 +185,8 @@ public class RuleBasedRecommendationEngine implements RecommendationEngine {
                     book.getCategories().stream().map(Category::getName)
                             .sorted(String.CASE_INSENSITIVE_ORDER).toList(),
                     book.getPublicationYear(), book.getPageCount(), book.getAvailableQuantity(),
-                    score, List.copyOf(reasons), List.copyOf(matchedTags));
+                    total(), new AuraScoreBreakdown(moodPoints, themePoints, timePoints, intensityPoints),
+                    List.copyOf(reasons), List.copyOf(matchedTags));
         }
     }
 }

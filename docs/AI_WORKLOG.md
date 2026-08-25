@@ -186,6 +186,13 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Goal:** implement P2 Shelf Aura with the agreed choices: enriched book data (page count + tags), public access, top 6 results, and seven moods (`cozy`, `adventurous`, `romantic`, `dark`, `funny`, `thoughtful`, `inspiring`).
 - **Files:** Liquibase `0012-book-aura-fields`; `Book`/DTO/mapper/service/CSV extensions; `recommendation/**` engine, query, DTO, controller; public category endpoint; security; React `/aura` page/API/URL state; ADMIN book form fields; tests; README/ERD/requirements/decision docs.
 - **Important review points:** legacy seven-column CSV remains valid; extended header appends `pageCount,tags`; missing page counts are neutral rather than guessed; active-only recommendations; score order is deterministic (score desc, title asc, id); reasons and matched tags explain every result; endpoint is public and limited to six.
-- **Tests/commands executed:** targeted engine **8/8 pass**; aura integration **4/4 pass**; clean backend `./mvnw verify` **74/74 pass**; frontend typecheck, **27/27 tests**, oxlint, and Vite production build pass. Live local JAR smoke: migration `0012` applied; public categories and aura endpoints returned 200; invalid no-signal request returned 400; admin-created tagged/page-count book received deterministic score/reasons.
+- **Tests/commands executed:** targeted engine **9/9 pass**; aura integration **4/4 pass**; clean backend `./mvnw verify` **75/75 pass**; frontend typecheck, **27/27 tests**, oxlint, and Vite production build pass. Live local JAR smoke: migration `0012` applied; public categories and aura endpoints returned 200; invalid no-signal request returned 400; admin-created tagged/page-count book received deterministic score/reasons.
 - **Result:** P2 #36 Shelf Aura complete; P2 #37 3D bookshelf can reuse the ranked 2D results as its reduced-motion/fallback view.
 - **Commit:** reported after review.
+
+### Shelf Aura enhancement follow-up
+
+- **User review:** Philosophy-only recommendations were receiving only the direct theme +4 while multi-signal dark books could reach 8; behavior was deterministic but not sufficiently intuitive.
+- **Enhancement:** added bounded alias vocabulary (`Philosophy` → `philosophical`, `reflective`, `meditative`, `essays`, etc.); direct theme category = +4, alias/exact tag signal = +3; kept themes as soft preferences rather than filters.
+- **Transparency:** API now returns `breakdown.mood/theme/time/intensity`; reasons include each contribution, including negative time penalties. React cards render the four-part breakdown.
+- **Regression proof:** added alias and breakdown assertions; final clean suite is **75/75 backend** and **27/27 frontend**.

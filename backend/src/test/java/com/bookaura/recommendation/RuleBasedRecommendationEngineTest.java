@@ -42,6 +42,7 @@ class RuleBasedRecommendationEngineTest {
         AuraRecommendation hit = result.get(0);
         // 2 tag hits ×3 + 1 category hit ×2 = 8
         assertThat(hit.score()).isEqualTo(8);
+        assertThat(hit.breakdown()).isEqualTo(new AuraScoreBreakdown(8, 0, 0, 0));
         assertThat(hit.matchedTags()).containsExactlyInAnyOrder("cozy", "comfort");
         assertThat(hit.reasons()).anyMatch(r -> r.contains("cozy mood"));
         assertThat(hit.reasons()).anyMatch(r -> r.contains("Poetry"));
@@ -59,6 +60,19 @@ class RuleBasedRecommendationEngineTest {
             assertThat(hit.score()).isEqualTo(3);
             assertThat(hit.matchedTags()).containsExactly("thoughtful");
         });
+    }
+
+    @Test
+    void philosophyThemeRecognizesPhilosophicalAlias_andShowsThemeBreakdown() {
+        Book philosophy = book("Quiet Notes", 304, Set.of("philosophical"), Set.of("Philosophy"));
+        when(bookRepository.findByActiveTrue()).thenReturn(List.of(philosophy));
+
+        AuraRecommendation result = engine.recommend(
+                new AuraQuery(Set.of(), null, Set.of("Philosophy"), null), 6).get(0);
+
+        assertThat(result.score()).isEqualTo(7);
+        assertThat(result.breakdown()).isEqualTo(new AuraScoreBreakdown(0, 7, 0, 0));
+        assertThat(result.reasons()).anyMatch(reason -> reason.contains("via tag philosophical (+3)"));
     }
 
     @Test

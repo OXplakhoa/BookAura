@@ -35,6 +35,7 @@ class AuraIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].bookId").isNotEmpty())
                 .andExpect(jsonPath("$[0].score").isNumber())
+                .andExpect(jsonPath("$[0].breakdown.theme").isNumber())
                 .andExpect(jsonPath("$[0].reasons").isArray())
                 .andExpect(jsonPath("$[0].matchedTags").isArray())
                 .andExpect(jsonPath("$[0].matchedTags[0]").value(tag));
