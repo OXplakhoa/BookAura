@@ -1,6 +1,6 @@
 import { Component, lazy, Suspense, useState, type ErrorInfo, type ReactNode } from "react";
 import { List as ListIcon, Sparkles } from "lucide-react";
-import type { AuraRecommendation } from "./aura-api";
+import type { AuraRecommendation, AuraSearch } from "./aura-api";
 import { chooseAuraViewMode, supportsAuraShelf, usePrefersReducedMotion, type AuraViewMode } from "./aura-view";
 
 const LazyAuraShelf3D = lazy(() => import("./AuraShelf3D").then(({ AuraShelf3D }) => ({ default: AuraShelf3D })));
@@ -30,7 +30,7 @@ class ShelfErrorBoundary extends Component<AuraShelfBoundaryProps, AuraShelfBoun
   }
 }
 
-export function AuraResultView({ books, fallback }: { books: AuraRecommendation[]; fallback: ReactNode }) {
+export function AuraResultView({ books, search, fallback }: { books: AuraRecommendation[]; search: AuraSearch; fallback: ReactNode }) {
   const reducedMotion = usePrefersReducedMotion();
   const shelfSupported = supportsAuraShelf();
   const [requestedMode, setRequestedMode] = useState<AuraViewMode>("shelf");
@@ -91,7 +91,7 @@ export function AuraResultView({ books, fallback }: { books: AuraRecommendation[
       {mode === "shelf" ? (
         <ShelfErrorBoundary key={books.map(({ bookId }) => bookId).join(",")} fallback={unavailableFallback}>
           <Suspense fallback={loadingFallback}>
-            <LazyAuraShelf3D books={books} />
+            <LazyAuraShelf3D books={books} search={search} />
           </Suspense>
         </ShelfErrorBoundary>
       ) : fallback}

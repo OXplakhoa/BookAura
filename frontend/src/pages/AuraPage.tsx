@@ -146,6 +146,7 @@ function AuraPageInner({ applied, onApply, onReset }: {
         {aura.data && aura.data.length > 0 && (
           <AuraResultView
             books={aura.data}
+            search={applied}
             fallback={(
               <ol className="grid gap-5 md:grid-cols-2">
                 {aura.data.map((book, index) => <AuraCard key={book.bookId} book={book} rank={index + 1} />)}

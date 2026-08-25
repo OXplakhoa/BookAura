@@ -5,8 +5,14 @@ const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 export type AuraViewMode = "shelf" | "cards";
 
 export function supportsAuraShelf(): boolean {
-  if (typeof window === "undefined" || typeof window.CSS?.supports !== "function") return false;
-  return window.CSS.supports("perspective", "1px") && window.CSS.supports("transform-style", "preserve-3d");
+  if (typeof window === "undefined" || typeof document === "undefined") return false;
+  try {
+    const canvas = document.createElement("canvas");
+    const options = { failIfMajorPerformanceCaveat: true };
+    return Boolean(canvas.getContext("webgl2", options));
+  } catch {
+    return false;
+  }
 }
 
 export function chooseAuraViewMode({ reducedMotion, supports3d }: { reducedMotion: boolean; supports3d: boolean }): AuraViewMode {

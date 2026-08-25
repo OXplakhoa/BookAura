@@ -1,11 +1,16 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { afterEach, describe, expect, it } from "vitest";
-import type { AuraRecommendation } from "./aura-api";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { emptyAuraSearch, type AuraRecommendation } from "./aura-api";
+
+vi.mock("./AuraShelf3D", () => ({
+  AuraShelf3D: () => <section aria-label="3D Shelf Aura">WebGL shelf scene</section>,
+}));
+
 import { AuraResultView } from "./AuraResultView";
 
-const originalCss = window.CSS;
+const originalGetContext = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
 const originalMatchMedia = window.matchMedia;
 
 const book: AuraRecommendation = {
@@ -23,7 +28,10 @@ const book: AuraRecommendation = {
 };
 
 function setEnvironment({ reducedMotion, supports3d }: { reducedMotion: boolean; supports3d: boolean }) {
-  Object.defineProperty(window, "CSS", { configurable: true, value: { supports: () => supports3d } });
+  Object.defineProperty(HTMLCanvasElement.prototype, "getContext", {
+    configurable: true,
+    value: () => supports3d ? {} : null,
+  });
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
     value: () => ({
@@ -42,7 +50,7 @@ function setEnvironment({ reducedMotion, supports3d }: { reducedMotion: boolean;
 function renderView() {
   return render(
     <MemoryRouter>
-      <AuraResultView books={[book]} fallback={<div data-testid="cards-fallback">2D recommendation cards</div>} />
+      <AuraResultView books={[book]} search={emptyAuraSearch} fallback={<div data-testid="cards-fallback">2D recommendation cards</div>} />
     </MemoryRouter>,
   );
 }
@@ -50,7 +58,7 @@ function renderView() {
 describe("AuraResultView", () => {
   afterEach(() => {
     cleanup();
-    Object.defineProperty(window, "CSS", { configurable: true, value: originalCss });
+    if (originalGetContext) Object.defineProperty(HTMLCanvasElement.prototype, "getContext", originalGetContext);
     Object.defineProperty(window, "matchMedia", { configurable: true, value: originalMatchMedia });
   });
 
@@ -74,7 +82,7 @@ describe("AuraResultView", () => {
     expect(screen.getByText(/Reduced motion is enabled/i)).toBeInTheDocument();
   });
 
-  it("uses the 2D cards when CSS 3D support is unavailable", () => {
+  it("uses the 2D cards when WebGL support is unavailable", () => {
     setEnvironment({ reducedMotion: false, supports3d: false });
     renderView();
 

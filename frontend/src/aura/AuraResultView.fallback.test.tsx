@@ -1,7 +1,7 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { AuraRecommendation } from "./aura-api";
+import { emptyAuraSearch, type AuraRecommendation } from "./aura-api";
 
 vi.mock("./AuraShelf3D", () => ({
   AuraShelf3D: () => {
@@ -11,7 +11,7 @@ vi.mock("./AuraShelf3D", () => ({
 
 import { AuraResultView } from "./AuraResultView";
 
-const originalCss = window.CSS;
+const originalGetContext = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, "getContext");
 const originalMatchMedia = window.matchMedia;
 const book: AuraRecommendation = {
   bookId: "book-1",
@@ -30,12 +30,12 @@ const book: AuraRecommendation = {
 describe("AuraResultView lazy fallback", () => {
   afterEach(() => {
     cleanup();
-    Object.defineProperty(window, "CSS", { configurable: true, value: originalCss });
+    if (originalGetContext) Object.defineProperty(HTMLCanvasElement.prototype, "getContext", originalGetContext);
     Object.defineProperty(window, "matchMedia", { configurable: true, value: originalMatchMedia });
   });
 
   it("returns to the 2D cards when the lazy shelf cannot render", async () => {
-    Object.defineProperty(window, "CSS", { configurable: true, value: { supports: () => true } });
+    Object.defineProperty(HTMLCanvasElement.prototype, "getContext", { configurable: true, value: () => ({}) });
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       value: () => ({ matches: false, addEventListener: () => undefined, removeEventListener: () => undefined }) as unknown as MediaQueryList,
@@ -44,7 +44,7 @@ describe("AuraResultView lazy fallback", () => {
 
     render(
       <MemoryRouter>
-        <AuraResultView books={[book]} fallback={<div data-testid="cards-fallback">2D recommendation cards</div>} />
+        <AuraResultView books={[book]} search={emptyAuraSearch} fallback={<div data-testid="cards-fallback">2D recommendation cards</div>} />
       </MemoryRouter>,
     );
 
