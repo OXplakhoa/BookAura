@@ -23,3 +23,5 @@ databaseChangeLog:
       file: db/changelog/changesets/0010-system-configuration.yaml
   - include:
       file: db/changelog/changesets/0011-google-oauth.yaml
+  - include:
+      file: db/changelog/changesets/0012-book-aura-fields.yaml

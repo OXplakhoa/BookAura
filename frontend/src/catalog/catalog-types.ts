@@ -12,6 +12,8 @@ export interface Book {
   deletedAt: string | null;
   authors: string[];
   categories: string[];
+  pageCount: number | null;
+  tags: string[];
   createdAt: string;
   updatedAt: string;
 }

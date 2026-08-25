@@ -11,6 +11,8 @@ export interface BookInput {
   totalQuantity: number;
   authors: string[];
   categories: string[];
+  pageCount?: number | null;
+  tags?: string[];
   active: boolean;
 }
 

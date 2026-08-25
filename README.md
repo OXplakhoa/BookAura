@@ -27,10 +27,10 @@ infra/      docker-compose, local infrastructure
 
 ## Prerequisites
 
-- JDK 17 (this machine: `F:\tools\jdk-17.0.20+8`)
-- Docker Desktop (WSL data relocated to `F:\DockerData`)
+- JDK 17
+- Docker Desktop (or another Docker-compatible runtime)
 - Node 22+
-- No global Maven needed — use the committed Maven Wrapper (`mvnw`)
+- No global Maven needed — use the committed Maven Wrapper (`mvnw`); on macOS/Linux run `chmod +x backend/mvnw` once if needed
 
 ## Quickstart (local)
 
@@ -43,11 +43,16 @@ cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 # API: http://localhost:8080  |  OpenAPI UI: http://localhost:8080/swagger-ui.html
 
-# 3. Frontend
+# 3. Frontend (use a second terminal because the backend command stays running)
 cd frontend
 npm install
 npm run dev
 # SPA: http://localhost:5173 (Vite proxies /api to localhost:8080)
+
+# IDE note: if a Java IDE auto-builds into target/, use a clean packaged JAR to avoid stale
+# IDE-compiled classes overwriting Maven output:
+# cd backend && ./mvnw clean package -DskipTests
+# java -jar target/bookaura-backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=local
 
 # Frontend quality gate
 npm test
@@ -66,7 +71,8 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
   latest code is visible only to ADMIN at `/api/admin/dev/sms-outbox/latest`.
 - Account: `POST /api/account/email-change/request` and `/confirm` implement hashed, expiring,
   cooldown/attempt-limited, single-use verification of the new email.
-- Public catalog: `GET /api/books`, `GET /api/books/{id}`
+- Public catalog: `GET /api/books`, `GET /api/books/{id}`, `GET /api/books/categories`
+- Public Shelf Aura: `GET /api/recommendations/aura?moods=cozy,dark&timeMinutes=180&themes=Poetry&intensity=light` (top 6, deterministic scores/reasons)
 - ADMIN books: CRUD/search under `/api/admin/books`; CSV: `POST /api/admin/books/import`
 - Loans: `POST /api/loans`, `POST /api/loans/{id}/return`, `/active`, `/history`;
   ADMIN management under `/api/admin/loans`.
@@ -76,15 +82,16 @@ Local demo account (seeded only in `local` profile): `admin / admin`.
   normal APIs return 503 while health/control remain available.
 - Multi-sort example: `?sort=publicationYear:desc,title:asc`; maximum page size is 10.
 
-CSV header is exact; author/category lists use `|`:
+CSV accepts the legacy seven-column header or the extended Shelf Aura header; author/category/tag lists use `|`:
 
 ```csv
-title,isbn,authors,categories,publicationYear,totalQuantity,description
-Clean Code,9780132350884,Robert C. Martin,Programming|Software Engineering,2008,3,A handbook of agile software craftsmanship
+title,isbn,authors,categories,publicationYear,totalQuantity,description,pageCount,tags
+Clean Code,9780132350884,Robert C. Martin,Programming|Software Engineering,2008,3,A handbook of agile software craftsmanship,464,thoughtful|self-improvement|inspiring
 ```
 
 Import is all-or-nothing. File must be `.csv` and **strictly below 5 MiB**; validation
-errors are returned by row (for example `row[3].isbn`).
+errors are returned by row (for example `row[3].isbn`). A ready-to-import Aura dataset is at
+[`docs/aura-demo-books.csv`](docs/aura-demo-books.csv).
 
 Observability: every response carries `X-Trace-Id`; Log4j2 writes console + rolling file logs;
 HTTP bodies are bounded/redacted (auth bodies suppressed), and `@LogOperation` AOP records
@@ -93,6 +100,7 @@ service outcome/duration without arguments or return values.
 ## Implemented frontend journeys
 
 - Public editorial landing page, URL-backed catalog filters, availability and book detail.
+- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags.
 - Registration, email-link verification, password/phone-code login, Google OIDC and verified six-digit change-email;
   access token is memory-only, refresh cookie is HttpOnly.
 - Member borrow, active loans, due/overdue state, confirmed return and permanent history.

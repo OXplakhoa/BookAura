@@ -2,6 +2,7 @@ package com.bookaura.catalog.controller;
 
 import com.bookaura.catalog.dto.BookResponse;
 import com.bookaura.catalog.dto.BookSearchCriteria;
+import com.bookaura.catalog.repository.CategoryRepository;
 import com.bookaura.catalog.service.BookService;
 import com.bookaura.common.web.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @Tag(name = "Public catalog", description = "Read/search active books; authentication not required")
@@ -17,9 +19,11 @@ import java.util.UUID;
 public class BookCatalogController {
 
     private final BookService bookService;
+    private final CategoryRepository categoryRepository;
 
-    public BookCatalogController(BookService bookService) {
+    public BookCatalogController(BookService bookService, CategoryRepository categoryRepository) {
         this.bookService = bookService;
+        this.categoryRepository = categoryRepository;
     }
 
     @Operation(summary = "Search active books",
@@ -40,6 +44,13 @@ public class BookCatalogController {
         return bookService.searchPublic(
                 new BookSearchCriteria(title, isbn, author, category, available, publicationYear, true),
                 page, size, sort);
+    }
+
+    @Operation(summary = "List all category names (theme chips for catalog filters and Shelf Aura)")
+    @SecurityRequirements
+    @GetMapping("/categories")
+    public List<String> categories() {
+        return categoryRepository.findAllNames();
     }
 
     @Operation(summary = "Read active book detail")

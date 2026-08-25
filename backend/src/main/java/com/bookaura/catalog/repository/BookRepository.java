@@ -40,4 +40,8 @@ public interface BookRepository extends JpaRepository<Book, UUID>, JpaSpecificat
     @EntityGraph(attributePaths = {"authors", "categories"})
     @Query("SELECT b FROM Book b WHERE b.id = :id AND b.active = true")
     Optional<Book> findActiveDetailedById(@Param("id") UUID id);
+
+    /** Shelf Aura: all live titles in one bounded query; tags load via @BatchSize. */
+    @EntityGraph(attributePaths = {"authors", "categories"})
+    List<Book> findByActiveTrue();
 }

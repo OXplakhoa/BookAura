@@ -23,6 +23,7 @@ export function PublicLayout() {
           <div className={`${open ? "flex" : "hidden"} absolute inset-x-0 top-[76px] z-30 flex-col gap-3 border-b border-line bg-surface p-5 shadow-card md:static md:z-auto md:flex md:flex-row md:items-center md:border-0 md:bg-transparent md:p-0 md:shadow-none`}>
             <nav className="flex flex-col gap-1 md:flex-row md:items-center" aria-label="Main navigation">
               <NavLink to="/catalog" className={navClass} onClick={() => setOpen(false)}>Browse books</NavLink>
+              <NavLink to="/aura" className={navClass} onClick={() => setOpen(false)}>Shelf Aura</NavLink>
               {auth.authenticated && <NavLink to="/app/loans" className={navClass} onClick={() => setOpen(false)}>My library</NavLink>}
               {auth.isAdmin && <NavLink to="/admin" className={navClass} onClick={() => setOpen(false)}>Admin</NavLink>}
             </nav>

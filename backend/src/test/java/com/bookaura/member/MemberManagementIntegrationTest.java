@@ -231,7 +231,7 @@ class MemberManagementIntegrationTest extends AbstractIntegrationTest {
         String isbn = nextIsbn();
         return bookService.create(new BookRequest(
                 title, isbn, "Member search test", 2020, quantity,
-                List.of("Member Search Author " + isbn), List.of("Member Search"), true));
+                List.of("Member Search Author " + isbn), List.of("Member Search"), null, null, true));
     }
 
     private UserAccount createAccount(String roleName) {

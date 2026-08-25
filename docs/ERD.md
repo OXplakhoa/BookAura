@@ -1,6 +1,6 @@
 # ERD
 
-Implemented now: auth-core including Google identity/exchange, catalog, `loans`, and singleton `system_configuration` (through Liquibase `0011`). Later audit/recommendation tables remain planned.
+Implemented now: auth-core including Google/Facebook identities/exchange, catalog, Shelf Aura enrichment, `loans`, and singleton `system_configuration` (through Liquibase `0012`). Later audit/recommendation tables remain planned.
 
 ```mermaid
 erDiagram
@@ -17,6 +17,7 @@ erDiagram
     authors ||--o{ book_authors : writes
     books ||--o{ book_categories : in
     categories ||--o{ book_categories : tags
+    books ||--o{ book_tags : has
 
     roles { bigint id PK  varchar name UK }
     user_accounts {
@@ -76,6 +77,7 @@ erDiagram
         varchar title
         varchar isbn UK
         int publication_year
+        int page_count "nullable; aura time/intensity signal"
         int total_quantity
         int available_quantity "check >= 0"
         boolean active "soft delete"
@@ -83,6 +85,7 @@ erDiagram
     }
     authors { uuid id PK  varchar name }
     categories { uuid id PK  varchar name UK }
+    book_tags { uuid book_id FK  varchar tag PK "free-form aura label" }
     loans {
         uuid id PK
         uuid member_profile_id FK
