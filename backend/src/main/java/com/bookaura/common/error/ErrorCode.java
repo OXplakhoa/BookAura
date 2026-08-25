@@ -62,6 +62,9 @@ public enum ErrorCode {
     UNSUPPORTED_FILE(HttpStatus.UNSUPPORTED_MEDIA_TYPE),
     FILE_TOO_LARGE(HttpStatus.PAYLOAD_TOO_LARGE),
 
+    // Shelf Aura recommendations
+    AURA_INVALID_PARAM(HttpStatus.BAD_REQUEST),
+
     // Generic business rule violation (feature slices add specific codes)
     BUSINESS_RULE_VIOLATION(HttpStatus.UNPROCESSABLE_ENTITY);
 

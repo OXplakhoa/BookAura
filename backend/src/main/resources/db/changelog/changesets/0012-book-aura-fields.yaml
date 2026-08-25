@@ -1,0 +1,33 @@
+# 0012: Shelf Aura enrichment (D30) — pageCount + free-form tags power the rule-based recommender.
+databaseChangeLog:
+  - changeSet:
+      id: "0012-book-aura-fields"
+      author: bookaura
+      changes:
+        - addColumn:
+            tableName: books
+            columns:
+              - column:
+                  name: page_count
+                  type: integer
+                  remarks: "Nullable: unknown length stays neutral in aura scoring"
+        - createTable:
+            tableName: book_tags
+            columns:
+              - column:
+                  name: book_id
+                  type: uuid
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_book_tags_book
+                    references: books(id)
+                    deleteCascade: true
+              - column:
+                  name: tag
+                  type: varchar(40)
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: book_tags
+            columnNames: book_id, tag
+            constraintName: pk_book_tags

@@ -35,6 +35,10 @@ public class CsvImportService {
     private static final int MAX_REPORTED_ERRORS = 100;
     private static final List<String> EXPECTED_HEADERS = List.of(
             "title", "isbn", "authors", "categories", "publicationYear", "totalQuantity", "description");
+    /** Extended header (D30): optional aura columns appended at the end. */
+    private static final List<String> EXTENDED_HEADERS = List.of(
+            "title", "isbn", "authors", "categories", "publicationYear", "totalQuantity", "description",
+            "pageCount", "tags");
     private static final Set<String> ACCEPTED_MEDIA_TYPES = Set.of(
             "text/csv", "application/csv", "application/vnd.ms-excel", "text/plain", "application/octet-stream");
     private static final Logger AUDIT = LoggerFactory.getLogger("com.bookaura.audit");
@@ -109,9 +113,12 @@ public class CsvImportService {
                 .build();
 
         try (Reader reader = utf8BomAwareReader(file); CSVParser parser = format.parse(reader)) {
-            if (!EXPECTED_HEADERS.equals(parser.getHeaderNames())) {
+            List<String> headerNames = parser.getHeaderNames();
+            boolean extended = EXTENDED_HEADERS.equals(headerNames);
+            if (!extended && !EXPECTED_HEADERS.equals(headerNames)) {
                 throw new BusinessException(ErrorCode.CSV_HEADER_INVALID,
-                        "CSV header must be exactly: " + String.join(",", EXPECTED_HEADERS));
+                        "CSV header must be exactly: " + String.join(",", EXPECTED_HEADERS)
+                                + " (optionally followed by pageCount,tags)");
             }
             for (CSVRecord record : parser) {
                 long rowNumber = record.getRecordNumber() + 1; // + header row
@@ -123,7 +130,7 @@ public class CsvImportService {
                 if (!record.isConsistent()) {
                     errors.put("row[" + rowNumber + "]", "Column count does not match the header");
                 } else {
-                    ParsedRow row = parseRecord(record, rowNumber, errors, seenIsbns);
+                    ParsedRow row = parseRecord(record, rowNumber, errors, seenIsbns, extended);
                     if (errors.size() == errorsBefore && row != null) rows.add(row);
                 }
                 if (errors.size() >= MAX_REPORTED_ERRORS) {
@@ -146,7 +153,8 @@ public class CsvImportService {
         return rows;
     }
 
-    private ParsedRow parseRecord(CSVRecord record, long row, Map<String, String> errors, Set<String> seenIsbns) {
+    private ParsedRow parseRecord(CSVRecord record, long row, Map<String, String> errors, Set<String> seenIsbns,
+                                  boolean extended) {
         String prefix = "row[" + row + "].";
         String title = required(record.get("title"), prefix + "title", 255, errors);
         String rawIsbn = required(record.get("isbn"), prefix + "isbn", 20, errors);
@@ -171,8 +179,18 @@ public class CsvImportService {
         String description = record.get("description").trim();
         if (description.length() > 4000) errors.put(prefix + "description", "Description exceeds 4000 characters");
 
+        Integer pageCount = null;
+        List<String> tags = List.of();
+        if (extended) {
+            pageCount = parseInteger(record.get("pageCount"), prefix + "pageCount", errors);
+            if (pageCount != null && (pageCount < 1 || pageCount > 20_000)) {
+                errors.put(prefix + "pageCount", "Page count must be between 1 and 20000");
+            }
+            tags = splitNames(record.get("tags"), prefix + "tags", 15, 40, errors);
+        }
+
         return new ParsedRow(row, title, isbn, authors, categories, year, quantity,
-                description.isBlank() ? null : description);
+                description.isBlank() ? null : description, pageCount, tags);
     }
 
     private void validateAgainstDatabase(List<ParsedRow> rows) {
@@ -198,6 +216,9 @@ public class CsvImportService {
         book.setActive(true);
         row.authors().forEach(name -> book.getAuthors().add(authors.get(CatalogRelationResolver.normalizeName(name))));
         row.categories().forEach(name -> book.getCategories().add(categories.get(CatalogRelationResolver.normalizeName(name))));
+        book.setPageCount(row.pageCount());
+        row.tags().forEach(tag -> book.getTags().add(
+                tag.trim().toLowerCase(java.util.Locale.ROOT)));
         return book;
     }
 
@@ -241,6 +262,6 @@ public class CsvImportService {
 
     private record ParsedRow(long rowNumber, String title, String isbn, List<String> authors,
                              List<String> categories, Integer publicationYear, Integer totalQuantity,
-                             String description) {
+                             String description, Integer pageCount, List<String> tags) {
     }
 }

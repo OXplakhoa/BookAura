@@ -223,6 +223,7 @@ class LoanFlowIntegrationTest extends AbstractIntegrationTest {
                 quantity,
                 List.of("Loan Author " + isbn),
                 List.of("Loan Category"),
+                null, null,
                 true));
     }
 

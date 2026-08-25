@@ -117,6 +117,15 @@ public class BookService {
         }
         book.setAuthors(relationResolver.resolveAuthors(request.authors()));
         book.setCategories(relationResolver.resolveCategories(request.categories()));
+        book.setPageCount(request.pageCount());
+        // Tags: null = unchanged on update (empty on create); explicit list replaces (normalized).
+        if (creating || request.tags() != null) {
+            book.setTags(request.tags() == null ? new java.util.LinkedHashSet<>()
+                    : request.tags().stream()
+                            .map(String::trim).map(s -> s.toLowerCase(java.util.Locale.ROOT))
+                            .filter(s -> !s.isEmpty())
+                            .collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new)));
+        }
 
         boolean active = request.active() == null ? (creating || book.isActive()) : request.active();
         book.setActive(active);

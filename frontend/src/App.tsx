@@ -6,6 +6,7 @@ import { AppShell } from "./layouts/AppShell";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
 import { AccountSettingsPage } from "./pages/AccountSettingsPage";
+import { AuraPage } from "./pages/AuraPage";
 import { BookDetailPage } from "./pages/BookDetailPage";
 import { CatalogPage } from "./pages/CatalogPage";
 import { ForbiddenPage } from "./pages/ForbiddenPage";
@@ -39,6 +40,7 @@ export default function App() {
       <Route element={<PublicLayout />}>
         <Route index element={<HomePage />} />
         <Route path="catalog" element={<CatalogPage />} />
+        <Route path="aura" element={<AuraPage />} />
         <Route path="books/:bookId" element={<BookDetailPage />} />
       </Route>
 

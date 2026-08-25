@@ -178,3 +178,14 @@ Format: Date | Goal | Prompt summary | Files | Review points | Problems | Comman
 - **Result:** P0-B now 4/4 complete. All 35 core+bonus auth requirements done.
 - **Commits:** feature commit on `feat/facebook-oauth`; docs commit/merge reported after creation.
 - **Live verification (same session):** real Facebook consent completed end-to-end (app needed `email` permission added in the new use-case dashboard + `localhost` in App Domains — console-side only). First attempt 500'd on an **ECJ "Unresolved compilation problems" stub**: VS Code's JDT extension had overwritten Maven-compiled classes in `target/`. Fix: run the packaged JAR (`java -jar`) instead of `mvnw spring-boot:run` while an IDE watches the project. Retry succeeded: `OAUTH_IDENTITY_LINKED provider=FACEBOOK`, account created, session issued.
+
+---
+
+## 2026-08-25 — Session 4: Shelf Aura P2 recommendation feature
+
+- **Goal:** implement P2 Shelf Aura with the agreed choices: enriched book data (page count + tags), public access, top 6 results, and seven moods (`cozy`, `adventurous`, `romantic`, `dark`, `funny`, `thoughtful`, `inspiring`).
+- **Files:** Liquibase `0012-book-aura-fields`; `Book`/DTO/mapper/service/CSV extensions; `recommendation/**` engine, query, DTO, controller; public category endpoint; security; React `/aura` page/API/URL state; ADMIN book form fields; tests; README/ERD/requirements/decision docs.
+- **Important review points:** legacy seven-column CSV remains valid; extended header appends `pageCount,tags`; missing page counts are neutral rather than guessed; active-only recommendations; score order is deterministic (score desc, title asc, id); reasons and matched tags explain every result; endpoint is public and limited to six.
+- **Tests/commands executed:** targeted engine **8/8 pass**; aura integration **4/4 pass**; clean backend `./mvnw verify` **74/74 pass**; frontend typecheck, **27/27 tests**, oxlint, and Vite production build pass. Live local JAR smoke: migration `0012` applied; public categories and aura endpoints returned 200; invalid no-signal request returned 400; admin-created tagged/page-count book received deterministic score/reasons.
+- **Result:** P2 #36 Shelf Aura complete; P2 #37 3D bookshelf can reuse the ranked 2D results as its reduced-motion/fallback view.
+- **Commit:** reported after review.

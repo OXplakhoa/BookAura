@@ -15,6 +15,8 @@ public class BookMapper {
                 book.getTotalQuantity(), book.getAvailableQuantity(), book.isActive(), book.getDeletedAt(),
                 book.getAuthors().stream().map(Author::getName).sorted(String.CASE_INSENSITIVE_ORDER).toList(),
                 book.getCategories().stream().map(Category::getName).sorted(String.CASE_INSENSITIVE_ORDER).toList(),
+                book.getPageCount(),
+                book.getTags().stream().sorted(String.CASE_INSENSITIVE_ORDER).toList(),
                 book.getCreatedAt(), book.getUpdatedAt());
     }
 }

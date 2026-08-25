@@ -35,6 +35,16 @@ public class Book {
     @Column(length = 4000)
     private String description;
 
+    /** Nullable: unknown page count stays neutral in Shelf Aura scoring (D30). */
+    private Integer pageCount;
+
+    /** Free-form vibe labels (e.g. cozy, slow-burn) used by the rule-based recommender. */
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "book_tags", joinColumns = @JoinColumn(name = "book_id"))
+    @Column(name = "tag", length = 40, nullable = false)
+    @BatchSize(size = 50)
+    private Set<String> tags = new LinkedHashSet<>();
+
     @Column(nullable = false)
     private Integer publicationYear;
 

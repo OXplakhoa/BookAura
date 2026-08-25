@@ -16,6 +16,8 @@ public record BookResponse(
         Instant deletedAt,
         List<String> authors,
         List<String> categories,
+        Integer pageCount,
+        List<String> tags,
         Instant createdAt,
         Instant updatedAt
 ) {

@@ -55,8 +55,9 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public catalog: read-only. Backend still protects every mutation.
+                        // Public catalog + aura: read-only. Backend still protects every mutation.
                         .requestMatchers(HttpMethod.GET, "/api/books/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/recommendations/**").permitAll()
                         .requestMatchers(
                                 "/api/auth/register",
                                 "/api/auth/verify-email",

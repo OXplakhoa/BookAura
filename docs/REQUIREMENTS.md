@@ -66,7 +66,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
 
 ## P2 — Wow features (cut from bottom upward under time pressure)
 
-36. Shelf Aura — deterministic `RuleBasedRecommendationEngine` (score + human-readable reasons + matched tags)
+36. ~~Shelf Aura — deterministic `RuleBasedRecommendationEngine` (score + human-readable reasons + matched tags)~~ ✅ done 2026-08-25 (D30)
 37. 3D bookshelf (lazy chunk, 2D fallback, `prefers-reduced-motion`)
 38. Real SMS gateway
 39. Experimental AI (`EmbeddingRecommendationEngine` stub behind interface + feature flag only)

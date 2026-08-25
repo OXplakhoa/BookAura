@@ -59,9 +59,10 @@ public class AdminBookController {
     }
 
     @Operation(summary = "Import books from CSV (ADMIN)",
-            description = "Multipart .csv strictly below 5 MiB. Exact header: " +
-                    "title,isbn,authors,categories,publicationYear,totalQuantity,description. " +
-                    "Authors/categories use | separator. All-or-nothing transaction with row-level errors.")
+            description = "Multipart .csv strictly below 5 MiB. Legacy header: " +
+                    "title,isbn,authors,categories,publicationYear,totalQuantity,description; " +
+                    "optional aura columns may append pageCount,tags. Authors/categories/tags use | separator. " +
+                    "All-or-nothing transaction with row-level errors.")
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public CsvImportResult importCsv(@RequestPart("file") MultipartFile file) {
         return csvImportService.importBooks(file);
