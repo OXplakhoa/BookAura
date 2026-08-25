@@ -11,7 +11,7 @@ built as a **modular monolith** (Spring Boot + React SPA + PostgreSQL).
 | Layer     | Choice |
 |-----------|--------|
 | Backend   | Java 17, Spring Boot 3.5.x, Spring Data JPA, Spring Security (JWT), Bean Validation, Liquibase, Log4j2, AOP, Springdoc OpenAPI |
-| Frontend  | React 19, TypeScript, Vite, React Router, TanStack Query, Axios, React Hook Form + Zod, Tailwind CSS |
+| Frontend  | React 19, TypeScript, Vite, React Router, TanStack Query, Axios, React Hook Form + Zod, Tailwind CSS, React Three Fiber + Three.js |
 | Database  | PostgreSQL 16 — local: Docker, tests: Testcontainers, demo: Supabase (Postgres only, **no Supabase Auth**) |
 | Mail      | `EmailSender` abstraction — local: Mailpit, demo: Brevo SMTP via env vars |
 | SMS       | `SmsSender` abstraction — `FakeSmsSender` (console) for local demo only |
@@ -100,7 +100,7 @@ service outcome/duration without arguments or return values.
 ## Implemented frontend journeys
 
 - Public editorial landing page, URL-backed catalog filters, availability and book detail.
-- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags; eligible browsers also get a lazy CSS 3D shelf with an explicit list toggle and reduced-motion fallback.
+- Public Shelf Aura: mood/theme chips, reading-time budget, intensity, ranked top-six cards with transparent reasons and matched tags; WebGL-capable browsers also get the lazy React Three Fiber “Arcane Opus” chamber with procedural covers, mood-reactive light, an editorial preview panel, and reduced-motion/list fallback.
 - Registration, email-link verification, password/phone-code login, Google OIDC and verified six-digit change-email;
   access token is memory-only, refresh cookie is HttpOnly.
 - Member borrow, active loans, due/overdue state, confirmed return and permanent history.

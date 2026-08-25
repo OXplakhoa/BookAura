@@ -28,7 +28,7 @@ NOT a bookstore: no cart, checkout, payment, shipping, orders.
   five-minute hashed code, silent cooldown, five-attempt/single-use confirmation, normal app session,
   phone login UI and ADMIN-only local outbox with no raw OTP logs.
 - ✅ Facebook OAuth P0-B (#35): completed 2026-08-24 (D29).
-- Evidence: clean `./mvnw verify` = **75 backend tests, 0 failures/errors**; frontend **34 tests**,
+- Evidence: clean `./mvnw verify` = **75 backend tests, 0 failures/errors**; frontend **36 tests**,
   Oxlint, TypeScript and production build pass. Live through Vite proxy: login/refresh, all ADMIN list endpoints,
   Book create/update/archive, CSV multipart import/archive, Member create/update/disable and
   maintenance 200→503→200 all passed.
