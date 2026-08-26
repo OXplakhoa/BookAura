@@ -48,7 +48,7 @@ sequenceDiagram
     FE->>BE: POST /api/auth/refresh (cookie)
     BE->>DB: find refresh_sessions by hash(token)
     alt valid & active & not expired
-        BE->>DB: revoke old session; insert new session (same family_id)
+        BE->>DB: revoke old session and insert new session (same family_id)
         BE-->>FE: new accessToken + rotated cookie
     else revoked/expired token presented (reuse)
         BE->>DB: revoke ALL sessions in family_id
@@ -126,11 +126,11 @@ sequenceDiagram
     participant M as EmailSender
 
     FE->>BE: POST /api/account/email-change/request {newEmail} + Bearer
-    BE->>DB: ensure new email unique; insert CHANGE_EMAIL SHA-256 code (10m)
+    BE->>DB: ensure new email is unique, then insert CHANGE_EMAIL SHA-256 code (10m)
     BE->>M: send raw six-digit code to new email
     Note over DB: Current account email is unchanged
     FE->>BE: POST /api/account/email-change/confirm {code} + Bearer
-    BE->>DB: latest token for authenticated user/purpose; atomic unused→consumed
+    BE->>DB: latest token for authenticated user/purpose, atomically consume it
     BE->>DB: update user_accounts.email + email_verified_at
     BE-->>FE: refreshed UserSummary
 ```
